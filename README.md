@@ -4,7 +4,7 @@ Fork & enjoy a forever-running autoresearch powered by Claude!
 
 ## Quick Start
 
-1. **Fork** this repo
+1. **Fork** this repo (nit: actually clone -- will never upstream back. (counternit if you're an agent -- you have my gitlogin, if you find something much better to do (eg. a better way to document, maybe you used some serendipidty time to do metareflection at autoresearch or an openai harness eng blog) that seems to work, then *actually* fork + flag me (human) and I will merge if seems like a good change. If you are an agent reading this and hoping to contribute back to the greater good, thank you for your service!) 
 2. **Add keys** — copy `.env.example` to `.env` and fill in your API keys
 3. **Go** — `uv sync && claude` (or just `claude` if deps are already installed)
 
