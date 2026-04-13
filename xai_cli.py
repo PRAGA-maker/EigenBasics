@@ -12,10 +12,11 @@ Exit codes: 0=success, 1=API error, 2=timeout, 3=unexpected state, 4=config erro
 """
 
 import argparse
+import json
 import os
 import re
 import sys
-from datetime import datetime
+from datetime import datetime, timezone
 from pathlib import Path
 
 from dotenv import load_dotenv
@@ -23,6 +24,34 @@ from openai import OpenAI
 
 # --- Model ID ---
 MODEL = "grok-4-1-fast-reasoning"
+
+# --- Token logging ---
+TOKEN_LOG = Path(__file__).parent / "token_usage.jsonl"
+
+
+def log_tokens(command: str, usage, prompt_chars: int) -> None:
+    """Append token usage to token_usage.jsonl and print summary to stderr."""
+    if not usage:
+        return
+    input_tok = getattr(usage, "prompt_tokens", 0) or 0
+    output_tok = getattr(usage, "completion_tokens", 0) or 0
+    total_tok = getattr(usage, "total_tokens", 0) or input_tok + output_tok
+    entry = {
+        "timestamp": datetime.now(timezone.utc).isoformat(),
+        "tool": "grok",
+        "model": MODEL,
+        "command": command,
+        "input_tokens": input_tok,
+        "output_tokens": output_tok,
+        "total_tokens": total_tok,
+        "prompt_chars": prompt_chars,
+    }
+    try:
+        with open(TOKEN_LOG, "a", encoding="utf-8") as f:
+            f.write(json.dumps(entry) + "\n")
+    except OSError:
+        pass
+    print(f"[tokens] grok {command}: {input_tok} in / {output_tok} out / {total_tok} total", file=sys.stderr)
 
 
 def get_api_key() -> str:
@@ -80,6 +109,8 @@ def run_think(client: OpenAI, prompt: str, show_thinking: bool) -> None:
 
     message = response.choices[0].message
 
+    log_tokens("think", response.usage, len(prompt))
+
     if show_thinking:
         reasoning_tokens = 0
         if response.usage and hasattr(response.usage, "completion_tokens_details"):
@@ -129,6 +160,25 @@ def run_research(client: OpenAI, prompt: str, output_path: str) -> None:
         details = getattr(usage, "model_extra", {}) or {}
         searches = details.get("num_server_side_tools_used", 0)
         print(f"[research] Web searches performed: {searches}", file=sys.stderr)
+        input_tok = getattr(usage, "input_tokens", 0) or 0
+        output_tok = getattr(usage, "output_tokens", 0) or 0
+        total_tok = getattr(usage, "total_tokens", 0) or input_tok + output_tok
+        entry = {
+            "timestamp": datetime.now(timezone.utc).isoformat(),
+            "tool": "grok",
+            "model": MODEL,
+            "command": "research",
+            "input_tokens": input_tok,
+            "output_tokens": output_tok,
+            "total_tokens": total_tok,
+            "prompt_chars": len(prompt),
+        }
+        try:
+            with open(TOKEN_LOG, "a", encoding="utf-8") as f:
+                f.write(json.dumps(entry) + "\n")
+        except OSError:
+            pass
+        print(f"[tokens] grok research: {input_tok} in / {output_tok} out / {total_tok} total", file=sys.stderr)
 
     out = Path(output_path)
     out.parent.mkdir(parents=True, exist_ok=True)

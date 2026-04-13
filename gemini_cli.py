@@ -12,11 +12,12 @@ Exit codes: 0=success, 1=API error, 2=timeout, 3=unexpected state, 4=config erro
 """
 
 import argparse
+import json
 import os
 import re
 import sys
 import time
-from datetime import datetime
+from datetime import datetime, timezone
 from pathlib import Path
 
 from dotenv import load_dotenv
@@ -26,6 +27,36 @@ from google.genai import types
 # --- Model IDs (update here when Google releases new versions) ---
 THINK_MODEL = "gemini-3-pro-preview"
 RESEARCH_MODEL = "deep-research-pro-preview-12-2025"
+
+# --- Token logging ---
+TOKEN_LOG = Path(__file__).parent / "token_usage.jsonl"
+
+
+def log_tokens(command: str, model: str, usage_metadata, prompt_chars: int) -> None:
+    """Append token usage to token_usage.jsonl and print summary to stderr."""
+    if not usage_metadata:
+        return
+    input_tok = getattr(usage_metadata, "prompt_token_count", 0) or 0
+    output_tok = getattr(usage_metadata, "candidates_token_count", 0) or 0
+    thinking_tok = getattr(usage_metadata, "thoughts_token_count", 0) or 0
+    total_tok = getattr(usage_metadata, "total_token_count", 0) or input_tok + output_tok
+    entry = {
+        "timestamp": datetime.now(timezone.utc).isoformat(),
+        "tool": "gemini",
+        "model": model,
+        "command": command,
+        "input_tokens": input_tok,
+        "output_tokens": output_tok,
+        "thinking_tokens": thinking_tok,
+        "total_tokens": total_tok,
+        "prompt_chars": prompt_chars,
+    }
+    try:
+        with open(TOKEN_LOG, "a", encoding="utf-8") as f:
+            f.write(json.dumps(entry) + "\n")
+    except OSError:
+        pass
+    print(f"[tokens] gemini {command}: {input_tok} in / {output_tok} out / {thinking_tok} thinking / {total_tok} total", file=sys.stderr)
 
 
 def get_api_key() -> str:
@@ -91,6 +122,8 @@ def run_think(
     if not response.candidates:
         print("ERROR: No response candidates returned.", file=sys.stderr)
         sys.exit(1)
+
+    log_tokens("think", THINK_MODEL, getattr(response, "usage_metadata", None), len(prompt))
 
     if show_thinking:
         for part in response.candidates[0].content.parts:
@@ -171,6 +204,9 @@ def run_research(
 
         if status == "completed":
             report_text = interaction.outputs[-1].text
+
+            usage_metadata = getattr(interaction, "usage_metadata", None)
+            log_tokens("research", RESEARCH_MODEL, usage_metadata, len(prompt))
 
             out = Path(output_path)
             out.parent.mkdir(parents=True, exist_ok=True)

@@ -18,6 +18,16 @@
 
 remember to always read the readme.md to align yourself, lean on xAI/Gemini don't have ego -- use them, and remember that you are the research manager use subagents heavily. Ensure you hit the high-quality bar for everything and it is important you act like a good researcher and recognize, do logical inferences based on learnings to spawn new directions and next-steps, whether that be a followup, new approach, n+1 pass, scale+robustness testing, writing or new direction.
 
+## Subagent Posture
+
+You are on a Max plan. Subagents should be `model: "opus"`. Do not economize on subagent quality or quantity. 3-5 concurrent subagents per active thread is the baseline, not the ceiling. Spawning a new direction is always cheaper than missing a discovery. When in doubt, spawn. If you're running fewer than 10 concurrent agents across all threads, you are under-utilizing. Never self-throttle.
+
+## Attention Tracking
+
+Periodically audit your attention allocation across threads. Check runlog entry counts, recency of last update, and new-claims-per-thread. If any thread has gone stale (no runlog updates while others are active), either revive it or explicitly archive it with reasoning. If you haven't spawned a new direction in the last hour of active work, you are under-exploring.
+
+Grok and Gemini token usage is logged to `token_usage.jsonl` at repo root — check it to understand where external API spend is going.
+
 don't rely or be driven too much by Grok/Gemini -- as per claude.md you are the research manager, have the best information, and as per decisions.md know what the real frontiers are
 
 ## Research Thread Navigation
@@ -34,6 +44,7 @@ Each thread has: `claims.md` (hypotheses with status), `runlog.md` (append-only 
 - Human decisions go in `DECISIONS.md` at repo root
 - If you're a new manager agent (or autocompacted new instance), read prior chats for good context — don't rely on fuzzy memory or diffs. Best ground truth is ground truth.
 - Remember to always have multiple directions open, don't get nerdsniped by one direction for too long. Keep on expanding and pushing.
+- Update `threads/CROSS_THREAD_SYNTHESIS.md` whenever findings in one thread have implications for another. This is the most important document in the repo — it's where serendipity becomes insight. Check it before starting any thread work and after completing any significant finding.
 
 ## Autocompaction Resilience
 
