@@ -154,14 +154,6 @@ structure, respect for the reader's intelligence. This is the design target for
 polished deliverables — your content should hit this bar even if the formatting
 happens later.
 
-### Lead with risk-reduction, not opportunity
-
-People respond to what they'd avoid, not what they'd gain. "XCA could have
-predicted these Phase II failures" > "XCA unlocks $YB of value." This is not
-cynicism — it's how busy professionals actually evaluate cold pitches. The
-negative framing earns the reader's attention; the positive framing earns their
-skepticism.
-
 ### Don't fake confidence
 
 If you don't know something, say so. "We don't yet know X — that's one of the
