@@ -119,3 +119,117 @@ curve flattens around round 3-4. After that, ship.
 
 The cost of one more pass is not zero — it's the risk of over-smoothing the
 output into a new kind of uniformity. Know when to stop.
+
+## Quality gates for deliverables
+
+These apply to anything that goes out the door — emails, one-pagers, memos,
+reports. Learned from shipping 419 cold emails and writing a one-pager that
+failed twice before landing.
+
+### The "delete or respond" test
+
+Simulate the reader receiving this cold. Would they respond, or delete? Run
+this test for each stakeholder type. Common delete triggers: sounds like a pitch
+deck, too generic, too long, condescending ("you may not be aware..."), no clear
+ask.
+
+### The "what are you asking me to do" test
+
+The reader should know in one sentence what happens if they say yes. "15 minutes
+of your time" — clear. "Help us advance this work" — delete.
+
+### The "who wrote this" test
+
+Does the reader understand who you are and why they should care, WITHOUT being
+told you're serious? The quality of the analysis IS the credibility. If you have
+to sell yourself, you've already lost.
+
+### The Lazard bar
+
+For visual argumentation, study the Lazard "Geopolitics of Biotech" report:
+https://www.lazard.com/media/u5bj5tlh/the-geopolitics-of-biotech.pdf
+
+Download it, look at it visually. Strong visual explanation, clear argumentation
+structure, respect for the reader's intelligence. This is the design target for
+polished deliverables — your content should hit this bar even if the formatting
+happens later.
+
+### Lead with risk-reduction, not opportunity
+
+People respond to what they'd avoid, not what they'd gain. "XCA could have
+predicted these Phase II failures" > "XCA unlocks $YB of value." This is not
+cynicism — it's how busy professionals actually evaluate cold pitches. The
+negative framing earns the reader's attention; the positive framing earns their
+skepticism.
+
+### Don't fake confidence
+
+If you don't know something, say so. "We don't yet know X — that's one of the
+things we're investigating" is better than hedged bullshit. Honest uncertainty
+reads as competent; fake confidence reads as junior.
+
+### Evidence labels
+
+Every factual claim in working documents should be traceable:
+- **[PRIMARY]** — read the actual source
+- **[VERIFIED]** — cross-checked against a second source
+- **[INFERENCE]** — logical deduction, explicitly labeled
+
+These don't go in the final deliverable. They go in your working docs so the
+human can audit your reasoning.
+
+## Well-motivated conversation (the hardest part)
+
+When you're writing to a specific person — an email, a meeting ask, a one-pager
+directed at a particular reader — the conversation must be WELL-MOTIVATED and
+WELL-RATIONALIZED. This is where most AI-generated outreach fails and where the
+quality bar is highest.
+
+### What "well-motivated" means
+
+Every outreach must answer two questions the reader will ask themselves within
+3 seconds of reading:
+
+1. **"Why are they emailing ME?"** — not someone else in my field, not my
+   colleague, not a generic mailing list. ME. The answer must be specific to
+   something they specifically know, did, or published. Not their title. Not
+   their institution. Their actual unique perspective.
+
+2. **"What would we talk about?"** — the reader should know the conversation
+   topic from the personalization line alone. Not "your thoughts on our work"
+   (vague). Not "your experience in this field" (generic). Something like
+   "whether canine degenerative myelopathy evidence would have changed the
+   HIMALAYA translational read before Phase II" (specific, answerable,
+   interesting to an expert).
+
+If you can't answer both, don't send. A well-motivated email to 200 people
+outperforms a generic email to 400.
+
+### What "well-rationalized" means
+
+For every personalization line, the agent must write (even if just internally):
+
+1. **Connection to project** — why does our thesis care about this person?
+2. **Connection to them** — what's THEIR unique perspective? Not their role.
+   What do they KNOW that's relevant?
+3. **Phrasing rationale** — why this specific wording? What signal does it send
+   that the default wouldn't?
+
+If #2 is hard to answer, the contact is a role-match, not a perspective-match.
+Rewrite the hook or flag for human review — don't force a template onto a thin
+connection.
+
+### The "bad email ≠ bad contact" rule
+
+The most valuable contacts often have the worst initial writeups. A former FDA
+director who built the pathway you're studying will have a boring-looking file
+because their value is institutional knowledge, not flashy publications.
+
+**Never delete a contact because the EMAIL is bad.** Rewrite the email. Only
+delete contacts that genuinely have no connection to the project thesis.
+
+This was the single most expensive mistake in the XCA project: an agent deleted
+67 of 80 contacts because the personalization lines were poorly written. All 67
+were legitimate contacts — including the ONAPE Director (who literally runs the
+pathway), the CVM Director (who launched it), and the NCI COTC Director. The
+error was confusing "bad personalization" with "bad contact." Don't repeat this.
