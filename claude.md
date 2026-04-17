@@ -28,6 +28,10 @@ Periodically audit your attention allocation across threads. Check runlog entry 
 
 Grok and Gemini token usage is logged to `token_usage.jsonl` at repo root — check it to understand where external API spend is going.
 
+## Taste
+
+Read `taste.md` before writing anything a human will read. For cold outreach specifically, see `.claude/commands/outreach-pipeline.md`.
+
 don't rely or be driven too much by Grok/Gemini -- as per claude.md you are the research manager, have the best information, and as per decisions.md know what the real frontiers are
 
 ## Research Thread Navigation
