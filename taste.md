@@ -225,3 +225,95 @@ This was the single most expensive mistake in the XCA project: an agent deleted
 were legitimate contacts — including the ONAPE Director (who literally runs the
 pathway), the CVM Director (who launched it), and the NCI COTC Director. The
 error was confusing "bad personalization" with "bad contact." Don't repeat this.
+
+## Praneel's explicit framings (from live correction cycles)
+
+These are not abstract principles. They came from a human reviewing 25 emails
+at 1am and saying exactly what was wrong with each one. They're specific because
+they were earned.
+
+### The causal path must be explicit
+
+The most common failure in AI-generated outreach: the sentence leaves the key
+causal chain unsaid. It IMPLIES the connection instead of STATING it.
+
+Bad: "Response heterogeneity surfaces in pets, not mice."
+Why bad: the reader thinks "ok... and?" The unsaid part — the thing that actually
+matters — is: "testing drugs in naturally occurring disease in pets is a better
+predictor of Phase II success than testing in preclinical inbred mice." That's the
+claim. State it.
+
+Rule: any 3+ word chunk used to mean one thing needs to be brutally analyzed. It
+often doesn't mean anything. "Genomic comparability thresholds" — what is that,
+specifically? If you can't say it in a sentence, cut it.
+
+### Amazing > Human > Consultant (the creative ladder)
+
+Finding the specific way to say something — without rehashing what was already
+said, such that it introduces a NEW, FRESH, INTERESTING idea — is really
+difficult. That's the AMAZING tier. Not everyone can write AMAZING every time.
+
+The fallback is HUMAN: one "deeply human" thing per line. A "we", a "really",
+a "super". Something that couldn't have come from a template. But one is enough.
+Two is try-hard. Three is slop.
+
+The ideal is creative. The backup is human. The failure is consultant.
+
+### Match the person's world
+
+Before writing to someone, ask: what would THEY want to talk about? Not what do
+I want to ask them — what would make them want to reply?
+
+An SVP at a pharma company is unlikely to respond to a science question. A former
+FDA lawyer doesn't want to answer a legal hypothetical cold. A VC doesn't care
+whether your thing is "fundable" — that word signals a pitch.
+
+Think about the recipient's inbox. They get 50 emails a day. Yours has to be the
+one where they think "huh, that's an interesting question I have a view on."
+
+### Don't assume failure narratives
+
+You can reference a named failed trial. You cannot claim to know why it failed.
+Drug failure can be attributed to any number of causes — including causes that
+successful drugs also faced. When you say "mouse models didn't predict the clinical
+result," you are making a scientific claim the recipient may strongly disagree
+with. Frame it as a question, not an assertion.
+
+### One emphasis word per sentence, max
+
+"Really" — fine. "Really important" — fine. "Really important and genuinely
+critical" — slop. The test: count the emphasis words. If more than one, you're
+stacking modifiers because you're not confident in the sentence itself. Make the
+sentence confident, then you won't need the modifiers.
+
+### Tells that signal AI-generated text
+
+These are the specific words and patterns that make a reader think "a bot wrote
+this" — even if the rest of the sentence is solid:
+
+- "defensible" — AI tell
+- "serious" / "take seriously" — flag word
+- "credibly" at more than ~10% density
+- "lands at [X]" — cliche
+- em-dash + generic word ("— especially", "— particularly") — corporate tell
+- "one of the few" / "uniquely positioned" — sycophancy
+- "changes the calculus" — consultant-speak
+- "XCA-adjacent" / "[anything]-grade" / "[anything]-generated" — compound words
+  that were invented to avoid a banned word; the reader can tell
+- "You took over..." / "You filed..." / "You wrote..." — stawker (reads like
+  you've been researching them, which is true but shouldn't feel true)
+- "would have changed anything upstream" — corporate jargon
+- "fundable" — reads as a pitch
+- Study names without context ("how you'd read SHIMMER" — reader doesn't know
+  what SHIMMER is unless you tell them)
+
+### The rationalization is more important than the surface style
+
+An agent will add an emphasis word like "direct" and think "I did something in
+taste.md!" — but forget the actually important thing: does the email make sense?
+Is the ask motivated? Does the reader know what the conversation would be about?
+
+Surface style (opener rotation, word count, amplifier density) matters. But the
+RATIONALIZATION — why this person, why this phrasing, why this specific question —
+matters more. A perfectly styled email with no rationalization will be deleted.
+A slightly rough email with a clearly motivated ask will get a reply.
