@@ -68,6 +68,8 @@ If you're a new instance after context compaction, here's what to read to get up
 - Keep all agents running until completion; synthesize results as they arrive.
 - Update `DECISIONS.md` and `CROSS_THREAD_SYNTHESIS.md` with findings.
 - Don't overburden on only one frontier or thread at once -- always align yourself with decisions.md and think: what are the many frontiers and open directions available? This enables serendipity and better research management.
+- Map evidence, bring it in as a PDF, be exhaustive in your pre-work maps. Ask questions. Be inquisitve and pay attention to *all* the ways something may be true or untrue. Eg. don't find "X paper covers R1 population" -- the bar is R1+R2+R3 neccessarily. 
+- "Staircase" and other nonnormal study designs are often antipattern unless extremely well-rationalized and motivated.
 
 ## Overnight Mode
 
