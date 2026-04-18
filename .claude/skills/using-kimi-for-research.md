@@ -105,6 +105,20 @@ for (let i = 0; i < text.length; i += 2000) {
 
 Read with `pattern: 'CHUNK_'` and `limit: <enough>`.
 
+## THE third gotcha: parallel-tab rate limiting
+
+Kimi limits concurrent active chats on the Allegretto plan. Opening ~11 tabs simultaneously and firing queries into all of them triggers a modal on the later tabs: **"You already have several chats open. Please wait to finish them."** This modal appears in the DOM but is not surfaced as a tool error. The affected tab simply **sits idle with 0 markdown containers forever** — your send never reached Kimi's inference backend.
+
+Symptoms:
+- `.send-button-container` disappears (your btn presence check returns null)
+- `.markdown-container` count stays at 0 no matter how long you wait
+- Screenshot shows a "Tips" modal with "Got it / Upgrade" buttons
+
+Mitigations:
+1. **Keep concurrent active tabs ≤ ~8.** Fire the first batch, wait for some to finish (title changes from the default to a descriptive chat name, and the response container appears), then fire the next batch.
+2. **Always screenshot a silent tab** if its chunk count stays at 0 after a reasonable wait — you may be seeing a rate-limit modal.
+3. **Dismiss the modal by clicking "Got it"** and the tab should resume normal behavior, BUT your query content may have been lost; re-insert and re-submit.
+
 ## Response timing
 
 K2.5 Thinking typically takes 30s-3min per query depending on depth of web search. Don't poll — sleep via Bash `run_in_background: true`, or use `Monitor` with an until-loop if you need to wait on specific completion. Kimi updates the tab title when the chat enters a chat URL (`/chat/{uuid}`); this is a quick "did it submit" check.
