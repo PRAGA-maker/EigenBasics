@@ -5,7 +5,7 @@ description: Use when literature searches need real scholarly citations or multi
 
 # Using Kimi (kimi.com) for research
 
-Kimi K2.5 Thinking is a strong research agent — user pays for Kimi Allegretto (~$40/mo). It does deep web search with actual Scholar/academic retrieval, often better-sourced than Grok or Gemini for literature scanning. This skill documents how to use it reliably from Claude Code via the `mcp__claude-in-chrome__*` tools.
+Kimi K2.6 Thinking is a strong research agent — user pays for Kimi Allegretto (~$40/mo). It does deep web search with actual Scholar/academic retrieval, often better-sourced than Grok or Gemini for literature scanning. This skill documents how to use it reliably from Claude Code via the `mcp__claude-in-chrome__*` tools. (Verified end-to-end on 2026-04-24 against K2.6.)
 
 ## When to use
 
@@ -70,15 +70,20 @@ This pattern works across background tabs in parallel.
 
 ## Response extraction
 
-Kimi puts each message's final answer in `.segment-content-box` → the last `.markdown-container` inside it. Earlier `.markdown-container` elements are Kimi's mid-flight thinking/search steps — skip those.
+Kimi's final answer is the `.markdown-container` whose **direct parent** is `.segment-content-box`. K2.6 nests thinking/search-step `.markdown-container`s inside `.slot-container` siblings under the same segment, so a naive `querySelectorAll('.markdown-container')` will pick up reasoning text instead of the final answer. Use `:scope > .markdown-container` to filter to direct children only:
 
 ```javascript
 (() => {
-  const mcs = [...document.querySelectorAll('.markdown-container')];
-  const last = mcs[mcs.length - 1];
-  return last.innerText;
+  const segs = [...document.querySelectorAll('.segment-content-box')];
+  const lastSeg = segs[segs.length - 1];
+  if (!lastSeg) return null;
+  const finals = [...lastSeg.querySelectorAll(':scope > .markdown-container')];
+  if (!finals.length) return null;
+  return finals[finals.length - 1].innerText;
 })()
 ```
+
+(Verified 2026-04-24: in K2.6, `lastSeg` typically has 4 markdown-containers — three thinking blocks under `.slot-container` parents, one final answer at depth 1. Older K2.5 versions of this doc said "last `.markdown-container` inside `.segment-content-box`," which silently grabs thinking in K2.6.)
 
 ## THE second gotcha: cookie/query-string filter on tool results
 
