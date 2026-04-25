@@ -5,7 +5,7 @@ description: Use when literature searches need real scholarly citations or multi
 
 # Using Kimi (kimi.com) for research
 
-Kimi K2.6 Thinking is a strong research agent — user pays for Kimi Allegretto (~$40/mo). It does deep web search with actual Scholar/academic retrieval, often better-sourced than Grok or Gemini for literature scanning. This skill documents how to use it reliably from Claude Code via the `mcp__claude-in-chrome__*` tools. (Verified end-to-end on 2026-04-24 against K2.6.)
+Kimi K2.6 Thinking is a strong research agent — user pays for Kimi Allegretto (~$40/mo). It does deep web search with actual Scholar/academic retrieval, often better-sourced than Grok or Gemini for literature scanning. This skill documents how to use it reliably from Claude Code via the `mcp__claude-in-chrome__*` tools.
 
 ## When to use
 
@@ -135,6 +135,10 @@ Sidebar → Deep Research. Takes ~1 hour, produces report-grade output. Use for 
 ## Agent mode
 
 Only for tasks requiring multi-step web actions (filling forms, navigating multiple sites). Not needed for pure research queries.
+
+## Agent Swarm mode
+
+Good balance between depth and breath; excellent for tasks that require combining and evulating multiple moving parts together. 
 
 ## Operational tips
 
