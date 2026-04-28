@@ -5,6 +5,20 @@ and prepare for send. It was battle-tested across 419 contacts in the XCA Analys
 project and went through 5 iteration rounds before shipping. Everything below is
 hard-won.
 
+## Quality enforcement
+
+**Before declaring any line, batch, folder, or iteration "done," run the
+`outreach-quality-check` skill** (`.claude/skills/outreach-quality-check.md`).
+It codifies every bar from this file plus `taste.md` into a runnable per-line /
+per-batch / per-folder / per-iteration / deliverable / exemplar-handling check,
+plus hard-stop conditions that halt the pass and surface to the human.
+
+Subagents return PASS / FAIL / UNSURE + one-sentence justification per item.
+Any FAIL = fix before proceeding. Any hard-stop fires = halt and ask.
+
+Don't try to remember every rule from the prose below. The prose explains the
+WHY; the checklist enforces the WHAT. Use both.
+
 ## When to use
 
 When the human says: "find contacts", "write outreach", "cold email campaign",
