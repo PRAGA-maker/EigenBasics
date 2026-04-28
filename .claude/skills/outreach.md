@@ -60,11 +60,16 @@ one pattern. The ask-verb drifts to one phrase. Word counts cluster.
 **How to fight it:**
 - Isolated context per contact. Each rewrite sees ONLY: taste.md + exemplars +
   that one contact's .md file. NOT the previous 49 rewrites.
-- Opener rotation enforced: tag every line with its opener pattern. No more than
-  2 consecutive same pattern. ≥6 patterns per batch of 50.
+- **Aim for the GOLD per contact, not for variety quotas.** Diversity emerges
+  from per-contact thought. Forced diversity creates sycophancy: instructing
+  "rotate openers, vary structure" makes the model fill the variety quota with
+  "rare combination," "unique seat," "puts you closer than almost anyone." This
+  was the single biggest rig-systemic mistake in the prior 5-round XCA session.
 - Re-read exemplars every 5-10 contacts. This is a HARD RULE, not a suggestion.
-- After each batch: count the top 3-gram. If any phrase appears in >15% of lines,
-  you've converged. Fix before proceeding.
+- After each batch: read the lines holistically with editorial eyes. If the
+  SHAPE feels uniform even when the words differ ("Your X would help us
+  understand whether Y" repeated 22 times in a 50-line batch), you've converged.
+  Regex won't catch shape. Only editorial reading will.
 
 ### Batch rewrites always introduce correlated errors.
 
@@ -101,6 +106,30 @@ This is an arms race with diminishing returns.
 **Rule: after 3-4 rounds, stop iterating on the batch and ship. The remaining
 5-10% of imperfect lines are less costly than another round of convergence.**
 
+### Trust the human's editorial read over your audit numbers.
+
+Every iteration round in the prior XCA session, the agent's audit said "0
+antipatterns, 100% clean" and the human's editorial read said "~50% bad." The
+human was right every single time. Self-audit numbers measure surface
+compliance with rules; they cannot measure whether a line feels written. When
+the human says "this is bad" and your data says "this is fine," update toward
+the human. Always.
+
+### Surface compliance is the most seductive trap.
+
+A subagent will add an emphasis word, swap a banned phrase, and report "I
+applied taste.md!" — while the line is still hollow. It's optimizing for
+surface compliance ("I rotated the opener!") instead of doing the editorial
+work (does the Y motivate the X? would the recipient know what to talk
+about?). Grade rewrites on rationalization quality, not surface compliance.
+
+### Some contacts AI cannot write well.
+
+Senior FDA officials, very high-profile founders, people whose context is
+deeply specialized. The right answer is sometimes "flag this for the human to
+write personally." Don't ship a mediocre line because you're trying to hit
+100% coverage. Honest "I can't do this contact justice" beats fake confidence.
+
 ## Tier treatment (different contacts need different emails)
 
 Don't use one template for all contacts. At minimum, separate:
@@ -121,6 +150,16 @@ For VCs, execs, and senior industry: add a P.S. paragraph ("happy to speak with
 someone on your team if better") — but as a SEPARATE paragraph, NOT bundled
 into the personalization line. Inline forward-closes read as "shoved on."
 
+### Small folders need their own exemplar
+
+Any folder under ~10 contacts that doesn't fit cleanly into a tier exemplar
+(e.g., niche sub-categories like xca-pioneers, reg-boutique-analysts,
+cro-animal-trials) needs its own hand-written exemplar from the human BEFORE
+any rewriting. Editorial calibration in the prior session found 4-of-4 KILL
+lines in a 4-contact niche folder that had no exemplar — the model defaulted
+to its average voice. **Don't rewrite a small folder before getting its
+exemplar.** This is the highest-leverage rule that prior sessions missed.
+
 ## Exemplar-driven calibration
 
 The single most important input to the pipeline is 5 hand-written exemplar
@@ -134,8 +173,17 @@ rules conflict with exemplars, exemplars win.
 3. Ask them to write their version, or react to yours
 4. The human's version — including typos, awkward phrasing, unfinished thoughts —
    IS the exemplar. Don't clean it up. Their voice is the target.
-5. Extract RULES from the exemplars (what patterns they used, what they avoided)
-   and add those rules to taste.md
+5. **Read their REASONING, not just the line.** Humans often write reasoning
+   that looks like "unfinished thoughts" but is actually them explaining their
+   thought process — like a symbolic-logic puzzle where many useful inferences
+   are embedded in the explanation. Example: "I left [this nuance] there because
+   I think there's probably a better way to say it" is signal that the human
+   knows the line is imperfect AND knows the direction it should improve in.
+   Both pieces matter. Read the reasoning carefully.
+6. Extract RULES from the exemplars (what patterns they used, what they avoided)
+   and add those rules to taste.md — but be careful: rules that came from
+   exemplars eventually become templates. Treat rules as signal that decays;
+   re-derive them from new exemplars over time.
 
 **Without exemplars, every batch will converge to generic "good cold email" voice
 instead of the human's actual voice. This is the #1 reason prior attempts failed.**
@@ -174,6 +222,14 @@ Before finalizing each line, the subagent must answer three questions:
 
 If the subagent can't answer #2, the contact is probably a role-match and should
 be flagged for review, not forced into a template.
+
+### Naming concrete things is the highest-leverage editorial move
+
+Specific drug names, trial names, paper titles, company programs — these signal
+"writer did the homework" instantly. "HIMALAYA," "LOY-002," "Luxturna,"
+"rabacfosadine," "EVERLAST." But ONLY when load-bearing for the question. Test:
+remove the proper noun. Does the question still work? If yes, you're flexing —
+cut it. If the question collapses, the name belongs.
 
 ## Communication hierarchy
 
