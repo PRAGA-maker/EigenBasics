@@ -64,6 +64,8 @@ wrangler pages deploy <dir>                  # Pages
 
 Multi-account: pass `--account-id $CLOUDFLARE_ACCOUNT_ID` if `wrangler whoami` shows more than one account.
 
+`wrangler dev` runs the Worker on workerd (the actual prod runtime, open-source) at `http://localhost:8787`. Bindings simulated against on-disk state in `.wrangler/state/`, persisted across restarts: KV, R2, D1, Durable Objects, Queues, Vectorize. Per-binding `--remote` flag routes to live edge resources for what can't be simulated (Workers AI inference, AI Gateway, an already-populated R2 bucket). Use for: iterating Worker code, running D1 migrations locally, reproducing prod bugs with V8 stack traces via `--inspector-port`. Not for: validating AI Gateway routing rules, final pre-deploy validation (use `wrangler deploy` to a preview environment).
+
 **Don't run destructive wrangler commands without explicit human OK:** `wrangler delete`, `wrangler r2 bucket delete`, `wrangler d1 delete`, `wrangler kv namespace delete`. Same rule for `--force` flags. This is `git push --force`-tier irreversible.
 
 `wrangler tail` is a long-running stream. If you'll watch it for more than ~30s, dispatch a subagent with the goal stated as outcome ("watch logs, return any errors mentioning $X") and let it return synthesized results. Don't pipe live tail into the main thread — it burns context.
