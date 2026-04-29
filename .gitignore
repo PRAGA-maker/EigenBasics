@@ -9,6 +9,7 @@ __pycache__/
 dist/
 build/
 .eggs/
+uv.lock
 
 # Research outputs (large, auto-generated)
 outputs/
