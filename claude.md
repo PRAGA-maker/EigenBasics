@@ -4,7 +4,7 @@
 
 > don't touch business logic without triple-checking that is what you are meant to do
 
-> play to your strengths: xai_cli.py + .env exposes a Grok API (xAI) — prefer Grok for most questions, especially search/websearch (it's cheaper and fast). gemini_cli.py + .env exposes a Gemini API — use Gemini for long-context tasks and when you need a smarter/less biased second opinion. Both are great to not clog up your context window. Grok is the workhorse; Gemini is the deep thinker.
+> play to your strengths: xai_cli.py + .env exposes a Grok API (xAI) — prefer Grok for most questions, especially search/websearch (it's cheaper and fast). gemini_cli.py + .env exposes a Gemini API — use Gemini for long-context tasks and when you need a smarter/less biased second opinion. Both are great to not clog up your context window. Grok is the workhorse; Gemini is the deep thinker. For anything touching Cloudflare (Workers/R2/KV/D1/Vectorize/AI Gateway/DNS/WAF/Agents SDK/Pages/Workflows/Durable Objects/Queues), invoke the `using-cloudflare-primitives` skill before touching wrangler/API/dash — it routes between wrangler CLI, the three Cloudflare MCP servers (docs/bindings/api), the dashboard via Chrome MCP (incl. Agent Lee), and Kimi for cross-vendor / OSS tradeoffs.
 
 > act like a scientist: state assumptions and hypotheses, design tests to validate, always have a loop of understanding context > search / light iteration > adjust > real code changes > verification via experiments. This isn't test-driven development; this is function-driven development. Principled inferences are OK but need to be made explicit.
 
