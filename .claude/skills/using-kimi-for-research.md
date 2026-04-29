@@ -42,20 +42,19 @@ Kimi supports unlimited parallel tabs. Fire 4-8 angles at once for breadth.
 ### Fix 1 (slow, sequential)
 Do click→type→send per tab, one at a time. Simple but costs latency × N.
 
-### Fix 2 (fast, parallel-safe): JavaScript DOM insertion
-Inject text directly into Kimi's contenteditable via `javascript_tool`. This bypasses OS keyboard entirely:
+### Fix 2 (fast, parallel-safe): ClipboardEvent paste
+
+Kimi's input is a Lexical contenteditable (you'll see `data-lexical-text="true"` spans inside it). Lexical only updates its internal editor model when it sees specific events its plugins handle — direct DOM mutation does not. The right injection path is a synthetic `paste` event with a `DataTransfer` payload, which Lexical handles via its `CLIPBOARD_PASTE_COMMAND`:
 
 ```javascript
 (() => {
   const el = document.querySelector('.chat-input-editor');
   if (!el) return 'no editor';
   el.focus();
-  el.innerHTML = '';
   const text = `YOUR QUERY HERE`;
-  el.appendChild(document.createTextNode(text));
-  // React needs input events to notice the change
-  el.dispatchEvent(new InputEvent('input',       { bubbles: true, cancelable: true, inputType: 'insertText', data: text }));
-  el.dispatchEvent(new InputEvent('beforeinput', { bubbles: true, cancelable: true, inputType: 'insertText', data: text }));
+  const dt = new DataTransfer();
+  dt.setData('text/plain', text);
+  el.dispatchEvent(new ClipboardEvent('paste', { clipboardData: dt, bubbles: true, cancelable: true }));
   return { len: text.length };
 })()
 ```
@@ -66,7 +65,11 @@ Then submit by clicking the send button div (Kimi doesn't use a real `<button>`)
 document.querySelector('.send-button-container').click()
 ```
 
+**Wait ~1-2s between paste and click.** Lexical's render is async — if you `querySelector('.chat-input-editor').innerText` immediately after dispatching the paste, you'll see `"\n"` (empty) while the model is still settling. That does **not** mean the paste failed: the `find` tool and a screenshot will show the text correctly during this window, and the click will fire its handler once Lexical has integrated the input. If the click no-ops (URL stays at `/` instead of `/chat/{uuid}`), the editor state still reads as empty; wait longer, or fall back to `computer.left_click` at the visible send-button coords.
+
 This pattern works across background tabs in parallel.
+
+(Verified 2026-04-29 in K2.6. Earlier versions of this doc used `el.appendChild(document.createTextNode(text))` followed by dispatched `InputEvent`s — that path **does not update Lexical's model in K2.6**, produces doubled text in the visible editor (Lexical re-inserts the data from the InputEvent on top of the textNode you already appended), and the subsequent `.send-button-container.click()` no-ops because Lexical's editor state reads as empty. The paste-event path is the K2.6-correct replacement.)
 
 ## Response extraction
 
