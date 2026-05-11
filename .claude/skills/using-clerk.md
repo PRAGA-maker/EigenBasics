@@ -1,6 +1,6 @@
 ---
 name: using-clerk
-description: Use when adding authentication, sign-in/up flows, user management, organizations (B2B / multi-tenant), webhooks, JWT verification, session handling, or RBAC on a project that uses or could use Clerk — any framework (Next.js, React, Vue, Nuxt, Astro, Expo, React Native, TanStack Start, React Router v7, Chrome extension, native iOS/Android, vanilla JS, Express, Fastify). Routes between Clerk's installable Skills, the remote Clerk MCP server, the dashboard via Chrome MCP, and direct docs. Read before installing `@clerk/*` or wiring middleware.
+description: Use when adding authentication, sign-in/up flows, user management, organizations (B2B / multi-tenant), webhooks, JWT verification, session handling, or RBAC on a project that uses or could use Clerk — any framework. Routes between Clerk's installable Skills, the remote Clerk MCP server, the dashboard via Chrome MCP, and direct docs. Read before installing `@clerk/*` or wiring middleware.
 ---
 
 # Using Clerk
