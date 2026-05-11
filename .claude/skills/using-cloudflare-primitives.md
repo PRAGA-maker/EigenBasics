@@ -9,20 +9,16 @@ Cloudflare's surface area is huge and fragmented — the right answer is almost 
 
 ## When to use
 
-Anytime the task touches any Cloudflare product (Workers, Pages, R2, KV, D1, Vectorize, AI Gateway, Workers AI, Workflows, Durable Objects, Queues, DNS, WAF, Zero Trust, Tunnels, Stream, Images, Agents SDK, Pub/Sub, Hyperdrive, Containers). Also: when the human asks "is Cloudflare the right choice for X" — that's a Kimi question, not a Cloudflare question; route via section 7.
+Anytime the task touches any Cloudflare product (Workers, Pages, R2, KV, D1, Vectorize, AI Gateway, Workers AI, Workflows, Durable Objects, Queues, DNS, WAF, Zero Trust, Tunnels, Stream, Images, Agents SDK, Pub/Sub, Hyperdrive, Containers). Also: when the human asks "is Cloudflare the right choice for X" — that's a Kimi question, not a Cloudflare question; route via Door 4.
 
 ## The four doors
 
-| Door | Best for | Worst for |
-|------|----------|-----------|
-| **wrangler CLI** | deploy / run / mutate state / tail logs / local dev | "what should I do?" questions; cross-product comparisons |
-| **Docs MCP** (`https://docs.mcp.cloudflare.com/mcp`) | "how do I do X?" / API shapes / config schema | mutating state |
-| **Bindings MCP** (`https://bindings.mcp.cloudflare.com/mcp`) | "I already have ABC primitives, what pairs with them?" / KV vs D1 vs Vectorize / "what binding does this need?" | unrelated to bindings (DNS, WAF, etc.) |
-| **API MCP / Code Mode** (`https://mcp.cloudflare.com/mcp`) | discover + execute arbitrary REST calls; agent writes TS to query the schema and chain calls | trivial single-call ops (just use wrangler or curl) |
-| **Dashboard via Chrome MCP** | visual config, Agent Lee, things not exposed cleanly via API/CLI, debugging from the dashboard's view | anything scriptable — burns context |
-| **Kimi via `using-kimi-for-research` skill** | "Cloudflare X vs OSS Y vs SaaS Z?" / "is there an OSS primitive that beats this?" / multi-source tradeoff calls | Cloudflare-specific docs (Docs MCP is cheaper + closer to source) |
-
-**Default rule:** if you're reading or asking → MCP. If you're writing or running → wrangler. If you're configuring something visual or want a holistic "given what I have, what should I do?" answer → dashboard + Agent Lee. If you're comparing across vendors or considering OSS → Kimi.
+| Door | What it is | Best for | Worst for |
+|------|------------|----------|-----------|
+| **1. wrangler CLI** | the official Workers CLI; talks to your wrangler.jsonc project | Worker code, deploys, secrets, local dev (`wrangler dev`), project-bound resource setup | account-level CRUD with no project; "what should I do?" questions |
+| **2. Cloudflare MCPs** | three remote MCP servers (Docs / Bindings / API) | docs Q&A; account-level KV/R2/D1/Hyperdrive CRUD without a project; arbitrary REST calls via Code Mode | one-line ops well-served by wrangler/curl |
+| **3. Dashboard via Chrome MCP** | drive `dash.cloudflare.com/<account_id>/...` + Agent Lee | visual config; "given my actual deployed stack, what fits" via Agent Lee; things not in CLI/API | anything fully scriptable — burns context |
+| **4. Kimi** | `using-kimi-for-research` skill | "Cloudflare X vs OSS Y vs SaaS Z?"; OSS alternatives scan; multi-vendor tradeoffs | Cloudflare-specific docs (Door 2's Docs MCP is closer to source) |
 
 ## Auth setup (read first)
 
@@ -70,35 +66,51 @@ Multi-account: pass `--account-id $CLOUDFLARE_ACCOUNT_ID` if `wrangler whoami` s
 
 `wrangler tail` is a long-running stream. If you'll watch it for more than ~30s, dispatch a subagent with the goal stated as outcome ("watch logs, return any errors mentioning $X") and let it return synthesized results. Don't pipe live tail into the main thread — it burns context.
 
-## Door 2/3/4: Cloudflare's three remote MCP servers
+## Door 2: Cloudflare's three remote MCP servers
 
-These are public SSE/HTTP MCP endpoints maintained by Cloudflare. They're the highest-leverage way for an agent to *understand* Cloudflare without burning context on docs scrapes.
+Three public remote MCP servers maintained by Cloudflare. Highest-leverage way for an agent to *understand* and *operate on* Cloudflare without burning context on docs scrapes or hand-writing API calls.
 
-| Server | URL | Use it when |
-|--------|-----|-------------|
-| **Documentation MCP** | `https://docs.mcp.cloudflare.com/mcp` | "how do I do X?", "what's the YAML for Y?", "what does this error mean?" — token-efficient docs search |
-| **Workers Bindings MCP** | `https://bindings.mcp.cloudflare.com/mcp` | "I have R2 + a Worker, what should I add for vector search?", "KV vs D1 vs Vectorize for this access pattern?", "what's the binding shape for X?" |
-| **API MCP (Code Mode)** | `https://mcp.cloudflare.com/mcp` | discovery + execution against the full Cloudflare API; the agent writes TypeScript to query schema, chain calls, generate the implementation |
+| Server | Endpoint | Use it for |
+|--------|----------|------------|
+| **Documentation** | `docs.mcp.cloudflare.com/sse` | "how do I do X?", "what's the YAML for Y?", "what does this error mean?" — token-efficient docs search. Unauth. |
+| **Workers Bindings** | `bindings.mcp.cloudflare.com/mcp` | KV / R2 / D1 / Hyperdrive / Workers CRUD without a wrangler project; "what pairs with R2?" + binding-shape questions. OAuth-scoped to your account. |
+| **API (Code Mode)** | `mcp.cloudflare.com/mcp` | discovery + execution against the full Cloudflare REST API (~2,500 endpoints); agent writes JS that queries the schema and chains calls. OAuth-scoped to your account. |
 
-**Registering with Claude Code** (one-time per machine):
+### Registering with Claude Code
+
+Two non-obvious rules — both cost hours when ignored:
+
+1. **Endpoint suffix must match the transport flag.** Cloudflare hosts each server at two paths: `/sse` requires `--transport sse`, `/mcp` requires `--transport http`. Mismatch → `claude mcp list` shows "Failed to connect" or OAuth completes but reconnect silently fails forever.
+2. **Pin `--callback-port` on every OAuth-gated server.** Without it, Claude Code uses an ephemeral port for the OAuth callback. Cloudflare ties issued tokens to the exact `redirectUri`, so every restart creates a new credentials entry under a different hash, the client picks the wrong/empty one, and you get "Needs authentication" forever after.
+
+Canonical install (one-time per machine):
 
 ```bash
-claude mcp add cloudflare-docs https://docs.mcp.cloudflare.com/mcp --transport sse
-claude mcp add cloudflare-bindings https://bindings.mcp.cloudflare.com/mcp --transport sse
-claude mcp add cloudflare-api https://mcp.cloudflare.com/mcp --transport sse
+# Docs server — unauth, uses /sse + sse transport
+claude mcp add --transport sse  --scope user                       cloudflare-docs     https://docs.mcp.cloudflare.com/sse
+
+# OAuth-gated servers — /mcp + http + fixed callback port (unique per server)
+claude mcp add --transport http --scope user --callback-port 3118  cloudflare-bindings https://bindings.mcp.cloudflare.com/mcp
+claude mcp add --transport http --scope user --callback-port 3119  cloudflare-api      https://mcp.cloudflare.com/mcp
 ```
 
-The first invocation of each will trigger an OAuth flow in a browser tab (so Cloudflare can scope the connection to your account). Approve once; tokens persist.
+Then `/mcp` → authorize the two OAuth-gated servers → restart Claude Code once. Verify with `claude mcp list` — all three should show ✓ Connected, and the tool list should include real tools (`mcp__cloudflare-bindings__d1_database_query` etc.), not just `authenticate`/`complete_authentication` stubs.
+
+If OAuth is already broken (repeated "Got new credentials, but reconnecting failed"): `claude mcp remove --scope user <name>` for each affected server, then edit `~/.claude/.credentials.json` and set `"mcpOAuth": {}` (preserve the `claudeAiOauth` block verbatim — that's your Claude account token), then re-add with the canonical commands above.
 
 After registration, tool names appear as `mcp__cloudflare-docs__*`, `mcp__cloudflare-bindings__*`, `mcp__cloudflare-api__*`. Use `ToolSearch` with `select:mcp__cloudflare-<name>__<tool>` to load schemas before calling, same pattern as the Chrome MCP.
 
-**Code Mode (API MCP) note:** the API MCP exposes the entire Cloudflare REST API as a typed schema your agent reads, then writes TS that the server runs in a sandbox. Treat it like an LSP for CF — *read* the schema first (cheap), *then* write code (the agent does this; you don't have to hand-write API calls). This is the right tool for "I need to do something the CLI doesn't expose cleanly."
+**Bindings MCP can mutate, not just read.** It exposes CRUD tools (`kv_namespace_create/delete`, `r2_bucket_create/delete`, `d1_database_create/delete/query`, `hyperdrive_config_*`, `workers_list/get`) plus doc search. Use it for account-level resource ops you'd otherwise script via wrangler when there's no `wrangler.toml` project in play. For project-bound work (Worker code, deploys, secrets, local dev), still prefer wrangler — the bindings MCP doesn't touch your filesystem or `wrangler.jsonc`.
+
+**Code Mode (API MCP) note:** the API MCP exposes the entire Cloudflare REST API (~2,500 endpoints) as a typed schema. `mcp__cloudflare-api__search` takes a JS arrow function — you write code that introspects `spec.paths`, filters by tag, pulls request/response schemas — and `mcp__cloudflare-api__execute` runs API calls against your account. Treat it like an LSP for CF: *read* the schema first (cheap), *then* write code (the agent does this; you don't have to hand-write API calls). This is the right tool for "I need to do something the CLI doesn't expose cleanly" or anything that spans multiple products.
+
+**Bundled skills on the MCPs themselves.** Both `cloudflare-docs` and `cloudflare-bindings` expose `migrate_pages_to_workers_guide` as a tool — call it before doing any Pages→Workers migration (the description literally says "ALWAYS read this guide before migrating"). More such `*_guide` tools may be added; check the tool list after registering. Separately, Cloudflare publishes a richer catalog of downloadable Agent Skills at `github.com/cloudflare/skills` — clone the folders into `~/.claude/skills/` to install. Worth a one-pass scan when starting a new Cloudflare-heavy project to see what's pre-built (deploying Workers, configuring WAF, etc.).
 
 **Subagent-first for MCP exploration.** A first-time tour of the Bindings MCP or API MCP can produce 20k+ tokens of schema. Dispatch a subagent with the *outcome* stated ("what's the cheapest binding combo for a low-RPS read-mostly key-value cache with 100MB total?") and have it return the answer + the call sequence. Don't dump the schema into the main thread.
 
-## Door 5: Dashboard via Chrome MCP
+## Door 3: Dashboard via Chrome MCP
 
-For things that are visual, undocumented in the API, or where Agent Lee's holistic view of your account beats raw doc lookup.
+The dashboard is not a fallback when CLI/MCP fail — it's a first-class source of signal the other doors can't surface. Wrangler-first when something is scriptable, but **don't sleep on the dashboard**. Subagents make it cheap to visit: the DOM read is 10-30k tokens in a subagent that returns 200, so dispatch one and you pay nothing on the main thread. Default posture: when you're already doing non-trivial Cloudflare work, fire a parallel subagent to do a 2-minute dashboard sweep alongside the main task.
 
 URL pattern: `https://dash.cloudflare.com/<account_id>/<section>`. Substitute `$CLOUDFLARE_ACCOUNT_ID` for `<account_id>`. Common sections:
 
@@ -128,6 +140,34 @@ tabs_create_mcp → navigate(url=`https://dash.cloudflare.com/${CF_ACCOUNT_ID}/<
 
 The user is already authed in Chrome. Don't re-auth.
 
+### Unique value (only here)
+
+Things that live in the dashboard and nowhere else — these are the reasons to sweep even when the CLI/MCP would technically work:
+
+- **Security Insights** — bot/crawler patterns, WAF rule firing rates, suspicious country/ASN spikes, exposed-credential alerts, leaked-token detections
+- **Per-product observability** — request volume + error-rate + p50/p99 latency charts; CPU-time histograms; cold-start counts; sampled real-time logs with filter UI (`wrangler tail` is raw stream, dash is the queryable version)
+- **Deployment timelines** — failed builds with full log context, preview URLs, rollback diffs across Workers + Pages
+- **Billing / usage** — which Worker is burning your quota, per-product spend trajectory, free-tier cliffs you're about to hit
+- **Account warnings + product banners** — feature deprecations, region rollouts, account-level config changes the API doesn't expose
+- **Weird errors** — 1101 / 1015 / 1042 internal-error spikes that don't show in your code logs but are visible in the analytics tab
+- **Agent Lee** — see below
+
+### Dashboard observations log
+
+When you notice something on a sweep that isn't actionable *right now* but might matter later (a quiet WAF spike, a Worker burning unexpected CPU, a deprecation banner, an R2 size jump, a vector index that hasn't been queried in a month), **deposit it in `context/cloudflare-observations.md`** (create the file on first use; append-only, structured like a `runlog.md`):
+
+```
+## 2026-05-11 — <one-line headline>
+**Where:** dash URL where you saw it
+**What:** the observation
+**Why it might matter:** one or two sentences
+**Status:** noticed / investigating / handed to subagent #N / resolved
+```
+
+For small observations, leave them inline for future-you. For anything bigger ("this Worker has 12x the CPU it should"), dispatch a `general-purpose` subagent (model: opus) to investigate and append findings under the same entry.
+
+**The frame:** this account belongs to a team. The agent's job is to act like a cracked, bias-toward-action, first-principles engineer + PM with real ownership over what's deployed there. Notice things. Write them down. Pick threads up later. High ROI; the only cost is paying attention while you're already there.
+
 ### Agent Lee (the in-dashboard agent)
 
 Lee is Cloudflare's first-party "ask my account" agent — it has read access to everything deployed under the current account, plus write ops (DNS / SSL / Workers routes / etc.) gated behind per-action confirm dialogs. **Lee is not externally addressable** — you can only reach it via the dashboard. **Hotpath: "Ask AI" button in the top-right of any dashboard page** — opens a side panel; works from any URL under `dash.cloudflare.com/<account_id>/...`, so just navigate to `/home/overview` and click. Docs: `https://developers.cloudflare.com/agent-lee/`. Use Lee for:
@@ -150,9 +190,9 @@ These bite the same way on the Cloudflare dashboard:
 
 ### Subagent-first for dashboard ops
 
-ANY multi-step dashboard task should run in a subagent. Reading the DOM of a typical dash page is 10-30k tokens; doing 5 navigations in the main thread eats your budget. Dispatch a `general-purpose` subagent (model: opus) with the *outcome* stated ("turn on AI Gateway logging for this account; return the gateway ID") and let it return the result.
+ANY multi-step dashboard task — including the 2-minute sweeps above — should run in a subagent. Reading the DOM of a typical dash page is 10-30k tokens; doing 5 navigations in the main thread eats your budget, while a subagent reads it all and returns 200 tokens. Dispatch a `general-purpose` subagent (model: opus) with the *outcome* stated ("turn on AI Gateway logging for this account; return the gateway ID" / "sweep Security Insights + Workers analytics for anything unexpected and append to `context/cloudflare-observations.md`") and let it return the result. Cheap to fire, high ROI per fire — don't ration them.
 
-## Door 6: Kimi for cross-vendor / OSS tradeoffs
+## Door 4: Kimi for cross-vendor / OSS tradeoffs
 
 Cloudflare's own surfaces are honest about *Cloudflare* but won't tell you "actually self-hosted Postgres on Hetzner is cheaper for your access pattern" or "the OSS alternative to Workers AI is better-suited here". Kimi can.
 

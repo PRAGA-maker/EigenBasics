@@ -8,7 +8,9 @@
       "WebFetch(domain:raw.githubusercontent.com)",
       "WebFetch(domain:api.x.ai)",
       "WebFetch(domain:ai.google.dev)",
-      "WebFetch(domain:docs.cloud.google.com)"
+      "WebFetch(domain:docs.cloud.google.com)",
+      "mcp__cloudflare-docs__migrate_pages_to_workers_guide",
+      "mcp__cloudflare-docs__search_cloudflare_documentation"
     ],
     "deny": [
       "Bash(rm -rf /)",
