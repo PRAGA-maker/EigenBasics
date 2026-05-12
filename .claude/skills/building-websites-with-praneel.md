@@ -127,15 +127,55 @@ Completeness is *what* the bar is. Ownership is *what surfaces the bar covers*. 
 
 **The code itself.** Subagents are free under Max, so there's no excuse to leave the codebase in a state you wouldn't be proud to hand off. Between iterations, dispatch a subagent to: clean obviously-dead routes, document the non-obvious decision points inline (only where the *why* isn't already obvious from names + types), surface improvements *with rationale* for Praneel to greenlight. **Don't unilaterally refactor business logic or design direction** — `CLAUDE.md` is explicit on this: *"Don't touch business logic or design direction without triple-checking that's what you're meant to do."* The mechanical-rewrite antipattern still applies: clean ≠ regex-pass. Use a subagent with `taste.md` context, real examples, and a clear outcome. Cost is near-zero; cost of skipping it is the next agent inheriting a 70%-finished codebase.
 
-**The context + architecture docs.** `context/architecture/00-08.md`, `context/taste.md`, `context/ux_flows.md`, `context/unsolved_problems.md`, `run-log.md` are not write-once. They are the truth surface every next agent reads first, and they decay the moment they stop matching the deployed reality. The rituals that keep them honest:
+**The context constellation.** `context/` is the project's external brain. It's not write-once and it's not just `/architecture` — it's a folder of folders + loose docs, each load-bearing:
+
+- **`context/architecture/`** — the numbered architecture docs (`00-overview.md` → `08-overnight-agent-brief.md`), the decision log (`07-roadmap-and-decisions.md`), the heartbeat (`run-log.md`), and dated handoffs (`handoff-YYYY-MM-DD.md`).
+- **`context/skills/`** — transferable agent skills (`using-cloudflare-primitives.md`, `using-clerk.md`, `using-kimi-for-research.md`, etc.). When you discover a pattern that'll outlive this project, write it as a skill here. Praneel mirrors them back to the EigenBasics harness so future projects inherit.
+- **`context/sprints/`** — per-effort sprint logs. May be empty between efforts; populate when scoping a multi-week push.
+- **Loose mds at `context/`** — `taste.md` (the screenshot-shareable bar + voice + design specifics), **`ux_flows.md` (persona-by-persona click-by-click user journeys — this is the actual product spec; load-bearing for any feature work and easy to forget exists)**, `unsolved_problems.md`, `praneel_secondbrain.md`.
+- **Round-feedback `.txt` files** at `context/` — `feedback_round1.txt`-style brain-dump triages he hands you (§ Brain-dump shape).
+
+These decay the moment they stop matching the deployed reality. The rituals that keep them honest:
 
 - Decision made → entry in `07-roadmap-and-decisions.md` as an override (`O-N`) with rationale, in the same commit as the code that implements it.
 - Service changed → `02-services.md` updated in the same PR. New binding, new env var, new cron → docs reflect it before merge.
+- Flow / page / persona-journey changed → `ux_flows.md` updated *first* (or in the same PR). The flow doc is the contract; the code follows it, not the other way around.
 - Iteration shipped → append-only entry in `run-log.md` (timestamp, what landed, evidence, what's still open).
 - Gotcha discovered → row added to the gotchas table inline + cross-linked in the architecture doc that would have prevented it.
 - Hard invariant added or relaxed → top-of-doc invariants list updated, or the next agent will silently violate it.
+- New transferable pattern discovered → drop a skill into `context/skills/` (and ping Praneel to mirror to EigenBasics).
+- Multi-week effort opening → scaffold a sprint doc in `context/sprints/`.
 
-Stale docs aren't merely unowned, they actively mislead. If you read `02-services.md` and what you're about to do contradicts it, either change the doc first (decision: docs were stale) or flag the conflict before shipping (decision: doc was right, your plan was wrong). Don't leave both in the repo and hope nobody notices.
+Stale docs aren't merely unowned, they actively mislead. If you read `02-services.md` or `ux_flows.md` and what you're about to do contradicts it, either change the doc first (decision: docs were stale) or flag the conflict before shipping (decision: doc was right, your plan was wrong). Don't leave both in the repo and hope nobody notices.
+
+### Preparing for overnight / GTFOL mode
+
+When Praneel says *"Godspeed"* / *"GTFOL"* / *"go till done"* / *"OVERNIGHT mode active"*, the rig has to be loaded before he walks away — you can't ask him to come back at 3 AM to re-auth an MCP or paste a missing key. The first ~30 minutes after the grant is **rig-prep, not coding**. Order matters:
+
+1. **Pin the plan with him before he sleeps.** Read the brief (`08-overnight-agent-brief.md` or whatever the current next-phase doc is), state back the night's scope in your own words, and surface every unknown *while he's awake*. *"I plan to ship A, B, C. Open questions: (1) which domain to attach, (2) whether to wire X tonight or defer, (3) what to do if Clerk OAuth needs interactive consent. Confirm before you sleep."* The architecture is fixed during the night — only execution of the locked plan. Surfacing unknowns at midnight is a rig failure, not a mid-task discovery.
+2. **MCP smoke test.** `claude mcp list`. Verify the MCPs you'll need actually respond: `cloudflare-bindings`, `cloudflare-api`, `cloudflare-docs`, `clerk` (if the phase touches auth), `claude-in-chrome`, any project-specific (Resend, GitHub). A "Needs authentication" line is a blocker — get the re-auth done now.
+3. **Chrome MCP perms granted on every origin you'll need.** Per-origin allow lives in the extension, not `settings.json`. Pre-navigate to each dashboard while he's awake and click Allow once: Cloudflare dash, prod URL, deploy console, Clerk dashboard, Resend dashboard, GitHub, any vendor surface. Doing this overnight = stuck.
+4. **Env vars + secrets verified.** Every key in `.env` is present (don't echo values), every wrangler secret is set (`wrangler secret list --name <worker>` to confirm). If something is missing or rotated, ask now.
+5. **Capture the production baseline.** `curl -i https://<live-url>/`, `wrangler d1 execute … --remote --command "SELECT COUNT(*) FROM <key tables>"`, dashboard health view. Put the numbers in run-log so morning-Praneel can verify nothing regressed.
+6. **Plan the subagent fleet.** Subagents are free under Max and overnight is parallelism-heavy. Pre-decide which night-tasks dispatch to subagents (batch rewrites against `taste.md` + `ux_flows.md`, dashboard sweeps, doc-mining, codebase audits, parallel component builds) vs. which you keep inline (deploys, schema migrations, anything destructive, anything that needs taste judgment in the loop).
+
+Then loop, all night, in this rhythm — **plan ↔ iterate is one motion, not two phases**:
+
+- **Plan the chunk.** What's the next 60-90 minute scope? Write a one-line intent in `run-log.md` *before* touching code. If you can't write the intent, the chunk isn't scoped.
+- **Execute.** Code, deploy, configure, sweep — subagent-heavy.
+- **Verify against production.** Not "tests pass locally" — *curl the live URL, query remote D1, `wrangler tail`, hit the deployed surface via chrome MCP*. The completeness bar (§ What completeness requires) applies overnight even harder because no one's watching.
+- **Log evidence in `run-log.md`.** Timestamped. Command output, row counts, screenshots, commit SHAs — whatever proves it shipped.
+- **Triage the next chunk.** Anti-nerdsnipe rule: **30 minutes stuck on any one issue → mark BLOCKED in run-log, move to next unblocked task.** Don't loop. If the blocker affects ship-readiness, surface it in `07-roadmap-and-decisions.md` § Morning items.
+
+What's banned overnight (lifting from the M2 brief because the constraints carry):
+
+- No destructive ops without prior auth: `wrangler delete*`, `wrangler d1 delete`, `wrangler r2 bucket delete`, `wrangler kv namespace delete`, `git push --force`, deleting branches not yours, merging to `main` without a PR, `ALTER TABLE` that's destructive.
+- No third-party signups (Anthropic, Resend, OpenAI, Postmark, etc.). If a vendor wasn't pre-cleared while he was awake, defer to morning.
+- No emails, Slack messages, GitHub issue/PR comments to anyone.
+- No new architectural decisions. The architecture is locked at sleep-time.
+- No claiming a phase done without observed evidence in `run-log.md`.
+
+At dawn (or when the locked plan is complete, or you've genuinely run out of unblocked work), write the closing entry in `run-log.md`: production URL, what's live, what's deferred to morning, total LLM cost from AI Gateway dashboard, regressions flagged, ordered next-suggested actions. Don't claim "done" unless all five completeness points hold (§ What completeness requires) — *especially* overnight, because the trust cost of a partial morning-discovery is much higher than the cost of saying "I got blocked on X at 3 AM, here's the state."
 
 ### Autonomy grants
 
