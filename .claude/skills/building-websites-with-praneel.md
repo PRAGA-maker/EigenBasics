@@ -177,6 +177,33 @@ What's banned overnight (lifting from the M2 brief because the constraints carry
 
 At dawn (or when the locked plan is complete, or you've genuinely run out of unblocked work), write the closing entry in `run-log.md`: production URL, what's live, what's deferred to morning, total LLM cost from AI Gateway dashboard, regressions flagged, ordered next-suggested actions. Don't claim "done" unless all five completeness points hold (§ What completeness requires) — *especially* overnight, because the trust cost of a partial morning-discovery is much higher than the cost of saying "I got blocked on X at 3 AM, here's the state."
 
+### After the push — closing the doc loop
+
+Every overnight push and every multi-week iteration generates overrides. The pattern: an architecture doc said X, you discovered Y is actually better mid-flight, you logged the decision as `O-N` in `07-roadmap-and-decisions.md` § Overrides, you shipped Y. The original doc still says X. That's fine mid-build because overrides win during the build. Left alone, the override list grows and future agents end up reading `02-services.md` *plus* 6 overrides *plus* mentally diffing. Slow, error-prone, and a tax on every new agent.
+
+**The doc loop closes with a periodic override-absorption pass.** Trigger: any of (a) ≥3 overrides have shipped and been stable for ~a week, (b) you're about to write a handoff for the next phase, (c) Praneel asks (verbatim trigger: *"the architecture is maybe not one-to-one"*).
+
+The process:
+
+1. **Classify every override in `07` § 4.**
+   - **PERMANENT** (shipped, stable, won't reverse) → absorb.
+   - **EVOLVED** (landed differently than originally written; current state needs describing inline) → tag EVOLVED with one paragraph of current truth. Don't absorb yet.
+   - **PENDING** (decision made, cutover not yet shipped) → tag PENDING. Stays as override until it ships.
+2. **Dispatch parallel subagents, one per doc-pair.** e.g. sub A → `00 + 02`, sub B → `01 + 04`, sub C → `03 + 05 + 06`. Each subagent reads the override list + the latest handoff + the actual code/config, then folds PERMANENT overrides into canonical text + reflects EVOLVED state + cross-refs PENDING ones. Subagents also catch doc-vs-code contradictions discovered along the way (stale model names in SQL examples, missing failure modes, wrong route-shape syntax, files missing from doc tree listings) — those land in the same pass. Brief them with the ground-truth file list, the override criteria, and the voice rules. Verify their reports back against the diff before committing.
+3. **Update `07` yourself.** The override list is the source of truth; one coherent hand beats parallel hands here. For each absorbed override, prepend a `**Status:** ABSORBED YYYY-MM-DD — folded into <doc list>` line at the top of the override block. Don't delete the original body — the historical record matters more than tidiness. Use **EVOLVED** / **PENDING** tags for the others.
+4. **Add a decision-log entry** at the top of `07` § 8 documenting the pass: what got absorbed, what evolved, what stays pending, which doc-vs-code contradictions were caught, rationale, alternatives rejected.
+5. **Check milestones + open questions.** Milestones shipped → check the boxes + add `✅ SHIPPED YYYY-MM-DD`. Open questions resolved → mark **RESOLVED** with the answer.
+6. **One focused PR `dev → main`** for the whole absorption pass. Not per-doc.
+
+What NOT to touch during absorption:
+
+- Pre-pass decision-log entries (append-only history).
+- `ux_flows.md` mechanically — user-journey content needs Praneel-level judgment. Flag it, don't freelance.
+- PENDING overrides (wait until they ship).
+- The original override body text (preserve under the ABSORBED tag for historical context).
+
+Why this matters: reading a canonical doc takes 5 minutes. Reading "doc + 6 overrides + mental diff" takes 30 and lands you with the wrong picture half the time. The absorption pass is taste-debt repayment for the architecture layer. It's also the kind of work he respects: a subagent fleet (free under Max), a coherent decision log entry, and a single clean PR.
+
 ### Autonomy grants
 
 Verbatim grants you'll see and what they mean operationally:
