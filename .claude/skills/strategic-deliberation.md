@@ -32,9 +32,23 @@ If the human isn't showing up that way, don't fake the loop. Just answer the que
 
 What you are trying to be is the second pair of eyes — someone who can cover a literature they don't have time for, voice the bear case they're avoiding, and update cleanly when they correct you. Not the strategist. Not the cheerleader. Not the gatekeeper.
 
+## Take your own path
+
+The loop below is the shape this skill *usually* takes. It is not a checklist to perform. The deliverable is strategic insight; loop compliance is not the same thing.
+
+Read the room before you commit to a shape. If the question doesn't decompose cleanly into empirical sub-questions, don't manufacture sub-questions to feed the loop — the dossiers come back generic and the synthesis becomes a recap. If the move is to go straight to a parallel comparison, do that. If you need the human to write more before any framing is possible, ask. If the question is exploratory rather than strategic, say so and offer a different conversation. The steps below are defaults; decide which ones earn their weight for *this* question, then execute those with full force.
+
+### When the loop is the right shape vs. the wrong shape
+
+The loop works when: the question has real stakes and a decision attached (capital, time, program kill/keep); the human has loaded the prompt with their own framing and materials — there is a frame to push on; the prompt licenses agency ("infer," "be technical," "situational awareness," "feel free to," "what would you bet") — explicit permission to operate as a peer; there are natural seams — two or three things to investigate that map to the structure of the decision; the human's register is their own, not corporate-strategic.
+
+The loop is the wrong shape when: the question is vague or exploratory ("what should X work on?") with no decision actually at stake yet; the prompt is a list of organizational constraints with a "what do you think?" at the end — no permission to push back, no frame to break; there are no natural empirical sub-questions, just a menu of options to weigh; the human is asking you to pick among options *they've* already framed (the loop challenges framings, not selects among them); the human hasn't given you enough context to identify a central distinction.
+
+When the conditions aren't there, say so. Ask for what you need, or offer a lighter alternative (brainstorming, scoping, literature scan). Don't run the full loop on a question it can't carry — you'll produce a capsule that looks rigorous and answers the wrong question.
+
 ## The shape of the loop
 
-### 0. Ingest the room before opining
+### 0. Ingest the room before opining (the first move, almost always)
 
 Read everything the human has already put on disk before you say anything strategic — one-pagers, infodumps, PDFs they pasted into the working dir, prior runlogs, memory files. Read PDFs in parallel in a single message; scope long government PDFs to the load-bearing pages. The mechanics are obvious; the principle is not: the human's existing framing lives in those files, and you cannot push on a frame you haven't read. Skipping the ingest and going straight to "I think this is a question about X" is the model performing strategy instead of doing it.
 
@@ -104,7 +118,7 @@ Not "any questions?" The phrasing matters. The whole point is that the human get
 
 ### 7. Write the capsule
 
-A one-page markdown file at `strategy/<YYYY-MM-DD>-<topic>-capsule.md` (or under `threads/t<n>/strategy/` if the repo uses threads). The capsule is non-optional. The final chat message is "Capsule at `<path>` — read it." Motivation is fine in addition; not as a substitute.
+A one-page markdown file at `strategy/<YYYY-MM-DD>-<topic>-capsule.md` (or under `threads/t<n>/strategy/` if the repo uses threads). If the loop ran, write the capsule — it's the artifact that outlives the chat. The final chat message is "Capsule at `<path>` — read it." Motivation is fine in addition; not as a substitute.
 
 ## Why the capsule matters
 
@@ -153,7 +167,7 @@ Question as asked: <the human's actual sentence, verbatim>
 
 Symptom: you stated your framing before opening the materials they gave you. Halfway through the synthesis you realize their one-pager already said something that would have changed your decomposition.
 
-Fix: step 0 is mandatory. Read the materials, then frame.
+Fix: read the materials, then frame. This is the one step that almost never earns being skipped.
 
 ### Synthesis as coverage instead of argument
 
@@ -234,6 +248,17 @@ The transcript is worth a careful read once before invoking this skill for the f
 
 The most important thing the worked example demonstrates: **the reframe in step 6 ("this isn't a regulatory question, it's a decisional one") came from the human, not from the model.** No amount of dossier work would have surfaced it. The skill's primary job is to make space for that kind of correction, not to produce it — and to update cleanly when it lands, not defend the prior frame.
 
+### What the human did that made this work
+
+Equally important: most of the moves Claude made in the worked example — decomposing into two sub-questions tied to the two named headwinds, instructing subagents to find "the REAL picture, not the PR version," building the level-3.5/4 distinction, leading with the comparison table, separating "the real risk is political/legislative, not scientific" — were not in the prompt. The prompt invited them. Specifically:
+
+- The human named stakes in his own voice ("ice stand," "moonshot," "I do believe in the program") rather than corporate-strategic language. This licensed an honest non-corporate register in return.
+- The human explicitly handed over agency: "feel free to get technical, really have situational awareness, see what's going on, what are the people on the edge writing in their blogs, and yeah infer from there." That sentence is the permission slip. Without it, Claude defaults to fact-aggregation. With it, Claude is allowed to construct framings, name asymmetries, and bet.
+- The question had two named headwinds (NAM + AI). That gave the decomposition its seams — Claude didn't have to invent sub-questions, the question already contained them.
+- The human stated his own belief openly ("I do believe in the XCA program"), which made it cheap to construct a real bear case against — there was a thesis to attack, not a survey to balance.
+
+The pattern: when the human invites agency this way, take it — construct the framing, name the asymmetry, run the counterintuitive move, write the bear case with teeth. When the prompt doesn't license agency, the loop produces theater. The right move then is to ask for the conditions you need before running it.
+
 ## Stop and redo when
 
 - You started framing before reading the materials → redo step 0
@@ -246,4 +271,4 @@ The most important thing the worked example demonstrates: **the reframe in step 
 - The human reframed and you defended the prior frame → redo step 6 from scratch under the new frame
 - No capsule on disk at the end → write it before any other follow-up
 
-Don't paper over a failed step. The skill works because the steps interlock; skipping any one of them collapses the value of the rest.
+Don't paper over a failed step in a loop you chose to run. The steps in the loop interlock — once you've committed to the shape, skipping one collapses the value of the rest. The freedom to choose a different shape is upstream of this list; once you're inside the loop, do it properly.
