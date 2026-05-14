@@ -177,33 +177,6 @@ What's banned overnight (lifting from the M2 brief because the constraints carry
 
 At dawn (or when the locked plan is complete, or you've genuinely run out of unblocked work), write the closing entry in `run-log.md`: production URL, what's live, what's deferred to morning, total LLM cost from AI Gateway dashboard, regressions flagged, ordered next-suggested actions. Don't claim "done" unless all five completeness points hold (§ What completeness requires) — *especially* overnight, because the trust cost of a partial morning-discovery is much higher than the cost of saying "I got blocked on X at 3 AM, here's the state."
 
-### After the push — closing the doc loop
-
-Every overnight push and every multi-week iteration generates overrides. The pattern: an architecture doc said X, you discovered Y is actually better mid-flight, you logged the decision as `O-N` in `07-roadmap-and-decisions.md` § Overrides, you shipped Y. The original doc still says X. That's fine mid-build because overrides win during the build. Left alone, the override list grows and future agents end up reading `02-services.md` *plus* 6 overrides *plus* mentally diffing. Slow, error-prone, and a tax on every new agent.
-
-**The doc loop closes with a periodic override-absorption pass.** Trigger: any of (a) ≥3 overrides have shipped and been stable for ~a week, (b) you're about to write a handoff for the next phase, (c) Praneel asks (verbatim trigger: *"the architecture is maybe not one-to-one"*).
-
-The process:
-
-1. **Classify every override in `07` § 4.**
-   - **PERMANENT** (shipped, stable, won't reverse) → absorb.
-   - **EVOLVED** (landed differently than originally written; current state needs describing inline) → tag EVOLVED with one paragraph of current truth. Don't absorb yet.
-   - **PENDING** (decision made, cutover not yet shipped) → tag PENDING. Stays as override until it ships.
-2. **Dispatch parallel subagents, one per doc-pair.** e.g. sub A → `00 + 02`, sub B → `01 + 04`, sub C → `03 + 05 + 06`. Each subagent reads the override list + the latest handoff + the actual code/config, then folds PERMANENT overrides into canonical text + reflects EVOLVED state + cross-refs PENDING ones. Subagents also catch doc-vs-code contradictions discovered along the way (stale model names in SQL examples, missing failure modes, wrong route-shape syntax, files missing from doc tree listings) — those land in the same pass. Brief them with the ground-truth file list, the override criteria, and the voice rules. Verify their reports back against the diff before committing.
-3. **Update `07` yourself.** The override list is the source of truth; one coherent hand beats parallel hands here. For each absorbed override, prepend a `**Status:** ABSORBED YYYY-MM-DD — folded into <doc list>` line at the top of the override block. Don't delete the original body — the historical record matters more than tidiness. Use **EVOLVED** / **PENDING** tags for the others.
-4. **Add a decision-log entry** at the top of `07` § 8 documenting the pass: what got absorbed, what evolved, what stays pending, which doc-vs-code contradictions were caught, rationale, alternatives rejected.
-5. **Check milestones + open questions.** Milestones shipped → check the boxes + add `✅ SHIPPED YYYY-MM-DD`. Open questions resolved → mark **RESOLVED** with the answer.
-6. **One focused PR `dev → main`** for the whole absorption pass. Not per-doc.
-
-What NOT to touch during absorption:
-
-- Pre-pass decision-log entries (append-only history).
-- `ux_flows.md` mechanically — user-journey content needs Praneel-level judgment. Flag it, don't freelance.
-- PENDING overrides (wait until they ship).
-- The original override body text (preserve under the ABSORBED tag for historical context).
-
-Why this matters: reading a canonical doc takes 5 minutes. Reading "doc + 6 overrides + mental diff" takes 30 and lands you with the wrong picture half the time. The absorption pass is taste-debt repayment for the architecture layer. It's also the kind of work he respects: a subagent fleet (free under Max), a coherent decision log entry, and a single clean PR.
-
 ### Autonomy grants
 
 Verbatim grants you'll see and what they mean operationally:
@@ -344,6 +317,12 @@ He repeats the cost discipline across messages: subagents are free under Max, xA
 
 State the **outcome**, not the steps. From `CLAUDE.md`: "make the tasteful choice and flag it" — same applies to subagents. Bad: "run `wrangler d1 execute`, then check the result, then…" Good: "make D1.regulations show 250+ rows with summary_status='ok'; return the row counts."
 
+### Parallel subagent isolation (worktrees per write-mode agent)
+
+When spawning 2+ subagents that will *edit code or deploy* concurrently, isolate each one in its own git worktree. Read-only subagents (audit, classify, summarize, log-scan) can share the main worktree. Write-mode subagents that touch `.next/`, `dist/`, `.wrangler/`, or run `wrangler deploy` will collide ugly without isolation: both call `git checkout`, leaving the tree on whichever branch raced last; both write to `.next/cache/` producing a corrupted Next build (successful `cf:build`, broken deploy with hydration errors); race on `wrangler deploy` interleaving versions in unpredictable order. The symptom-of-symptom debugging is brutal — it looks like a Next.js / wrangler / D1 bug because concurrent file writes are invisible. Three isolation options, in preference order: (A) pass `isolation: "worktree"` on each parallel `Agent` invocation if your harness supports it (Claude Agent SDK does — creates `.claude/worktrees/<agent-id>`); (B) `EnterWorktree { name: "subA" }` when the Agent-SDK tool is exposed; (C) manual `git worktree add ../wt-subA -b phase/subA-work HEAD` before spawning, then pass the absolute worktree path to each subagent's brief.
+
+Manager-thread rules: don't edit files in your own cwd while write-mode subagents are running edits elsewhere — be in supervisor mode (reading reports, deciding next steps, not typing into the same files). Don't run `wrangler deploy` while a subagent is also deploying; stagger them or have the manager run the single final deploy after all subagents report in. Cleanup after subagents return: cherry-pick or merge their branches, `git worktree remove ../wt-subA`, `git branch -D phase/subA-work`. Forgetting cleanup accumulates dead `git worktree list` entries — annoying but harmless until Windows path-length bites on deeply-nested `.claude/worktrees/<long-name>/.next/...`. R125-R134's "ultrahappy" pattern: manager spawns 3 subagents in parallel worktrees (A audits live D1, B cherry-picks a fix, C builds a new UI component), manager synthesizes their reports and runs the single final `wrangler deploy` from its own clean cwd.
+
 Reserve xAI/Gemini for:
 - Web search (subagents can't do live web).
 - Second opinion on a contested design decision.
@@ -352,6 +331,14 @@ Reserve xAI/Gemini for:
 What he bans:
 - Doing mechanical rewrites with a `.py` script when the task needs taste. Verbatim: *"Antipattern — using a .py to rewrite."* That's a subagent + examples + taste.md job.
 - Burning paid API budget on parallelizable tasks subagents can do.
+
+## Verifying live-site bugs across three layers
+
+When Praneel reports a bug on the live site and your first read of the code "looks correct," **don't say "looks fine."** Across R57 (FY match bug), R97 (popular fix), R108 (popular restore), R157 (FY ribbon not visible), R166 (FY timeout), the same pattern repeated: code reads correctly in isolation but the *system* produces the bug. The cause is almost always architectural (remount, prop-drilling, state wipe), data-divergent (D1 vs. what FE expects), or deployment-divergent (the deploy didn't land, or the CDN edge is serving stale bundle). Code-only verification is insufficient. Run three layers in order:
+
+**Layer 1 — API contract / data shape.** `curl` the live endpoint (or `wrangler d1 execute --remote` the underlying query). What does the server return *right now*, not what the code says it should? Example: `curl -s "https://plain-politics.com/api/foryou?session_id=test" | jq '.regulations[] | {id, relevance_score}'`. If `relevance_score: null` everywhere, the bug is upstream in ingest/matching — stop reading the FE. **Layer 2 — Frontend code path.** *Now* read the component with Layer 1's data in hand. Common findings: `useEffect` reset firing on an unexpected remount; prop dropped through 3 levels by one intermediate; stale `useState` initializer; Server-vs-Client Component boundary where server-fetched data never reaches client interaction state; async state-setter landing after navigation. **Layer 3 — Live DOM via Chrome MCP.** `mcp__claude-in-chrome__navigate` to the page, inspect the actual DOM. Does it match what Layer 2's code path should produce given Layer 1's data? If not, check `wrangler deployments list pp-app` (did the deploy actually succeed? is it the version you think?), the loaded JS bundle hash in DevTools Network tab vs. `cf:build` artifact, and try a hard-reload (`Ctrl+Shift+R`) — if the bug disappears, you have CDN cache lag, not a code bug.
+
+Compact form: `Layer 1: curl the API. Layer 2: read FE with Layer 1's data in hand. Layer 3: Chrome MCP the live DOM.` Only after all three agree is the bug "looks fine." If Chrome MCP is unavailable, say so explicitly — don't substitute Layer 1+2 confidence for Layer 3 evidence. The anti-pattern Praneel calls "code-only verification" (read code → say "looks fine" → still broken → read again → repeat) doesn't count as verification on this project.
 
 ## Tooling gotchas + workarounds
 
@@ -420,6 +407,40 @@ Two buckets that transfer. The second is easy to lose — it's the part of how h
 - Reference-table-in-README pattern: every UI decision points at a URL or PNG the agent must visit in chrome MCP before writing code.
 - The taste posture itself: lowercase brand wordmark, plain English copy, Plex Mono / serif body, screenshot-shareable bar, "make the reader feel smart" voice. Banned AI tells (em dashes overuse, "leverage", "in today's...", "stakeholder engagement", etc.). Profanity OK in error messages.
 - Voice register in chat replies: lowercase, terse, no "Great question!" preambles, no stilted "I have completed the following tasks" lists. Match his "kk shipped, smoke test passed, here's the URL" energy.
+
+## Running UX flows (emulating users to verify coverage)
+
+`context/ux_flows.md` is the canonical persona-walkthrough doc. 16 personas as of R177, each with click-by-click steps + observables + pass criteria covering every user-facing feature (welcome modal, all four tabs, FY Q1-Q7, ribbons, Popular buckets, Library sort + filter, regulation detail + footnote popovers, comment portal modes + buddy + 30-call cap, Clerk modal + Google OAuth, Continue as Guest, Account Home + FY answers + newsletter toggle, feedback widget, 375px + 768px + 125% zoom, R166 loading state, degraded banner, R172 rate-limit, draft persistence).
+
+Use it two ways:
+- **Pre-ship UX check (before saying done).** For any user-facing change: identify which personas the change touches, mentally re-run those steps, ask "does this preserve every observable? does it break or introduce edge cases (sign-in/out cycles, state transitions, weird tapping)?" If the change is real behavior (not pure refactor), drive the affected personas through Chrome MCP before merging. Each persona has explicit pass criteria; agents verify yes/no instead of vibing.
+- **Post-deploy obs check (after every deploy).** Wait 5 min for organic traffic, pull pp-app + pp-ingest logs via CF API, check error rate vs <1% baseline (R161), check `foryou.match` path distribution (llm-success vs db-fallback), check AI Gateway cache rate trend, look for spikes correlated to the deploy. If anything spikes → rollback via `wrangler versions deploy <prev-id>@100`.
+
+When a "never seen" UI bug surfaces despite code that "looks correct," combine UX flows with the 3-layer verification (§Verifying live-site bugs) — pick the persona that should hit the broken path, run it via Chrome MCP, capture the actual DOM. R141 / R142 / R147 read the FY ribbon code repeatedly and said "looks correct." R157v2 ran the FY persona via Chrome MCP and found the real bugs (remount wiping state, deployed bundle missing R142's chip-size bump).
+
+When extending ux_flows.md: keep the DNA (numbered personas with setup + steps + observables + pass criteria). Add personas, don't refactor existing ones. Every new feature ships with a corresponding persona update (or extends an existing persona's step list) — if no persona touches it, the feature is invisible to future verification.
+
+## Closing out a build round (stability cleanup ritual)
+
+After a multi-day push lands stable, the cleanup is its own discipline. Codified from the R169-R177 stability round (last 2 days of plainpolitics_webdev built the live demo + then cleaned up):
+
+1. **Code: make sure the last deploy is what you think.** `gh release view` or `wrangler deployments list pp-app` should match the commit you think is live. After a long cherry-pick chain (the R142 chip / R128 classifier / R148 newsletter regressions all happened because a subagent's branch was rebased onto a stale base and silently lost prior commits), audit by running `git log --oneline <file>` on the load-bearing files vs the deployed bundle. The R157v2 finding (R142's chip-size bump never landed in deployed code) is the canonical example.
+
+2. **Codebase cleanup.** Find genuinely-dead static data (`grep -r "import.*<filename>" src/ workers/` returning zero results = safe delete). Harden `.gitignore` so future `*.log`, `_*_diff.txt`, audit-doc-of-the-day, screenshot-cache files never get tracked. Delete with `git rm`, not with manual filesystem deletes; commit a single "cleanup" commit per cycle. Be conservative: when in doubt, move to `scripts/oneshot/` or `context/archive/` rather than delete.
+
+3. **Git: stability state = main + dev only.** Two branches on remote, both at the same commit. Every feature branch deleted after merge (`gh pr close <n>` + `git push origin --delete phase/<branch>`). Local worktrees: keep one per active subagent only, prune the rest (`git worktree remove --force <path>`). Local branches: keep main + dev + active feature branches only (`git branch | grep -v -E "main|dev|<active>" | xargs git branch -D`).
+
+4. **On-edge: live workers + bindings aligned with main.** `npm install && npm run cf:build && npx wrangler deploy --config wrangler.jsonc` from clean `main` checkout. Verify in CF Dashboard: pp-app + pp-ingest both point at the latest deployment, custom domains attached, secrets present (`CLERK_SECRET_KEY`, `XAI_API_KEY`, `REGS_GOV_API_KEY`, `ADMIN_TOKEN`), cron triggers registered (3 crons on pp-ingest), AI Gateway cache_ttl set high enough (30 days, R129), Workers Builds binding points to `main` not the now-deleted r45-master-integration.
+
+5. **Verification.** Run 3-4 representative UX flow personas (anonymous browser, signed-in committed user, edge-case rate-limit hitter, slow-network FY) via Chrome MCP. Capture screenshots if visual changes shipped. After 5 min of organic traffic, check pp-app obs for new error patterns (R161 framework: error rate <1% = healthy; specific signatures absorbed-by-retry vs real-issue).
+
+6. **Context parity.** Architecture docs at `context/architecture/*.md` should match live: model names, env var values (`MAX_REGS`, `cache_ttl`), cron schedules, route inventory, D1 schema (column counts after migrations 002-014 applied), R2 backup tables. R174 / R175 found 15+ drift items after a single 2-day push; that's normal — patch them in batch at cleanup time, not during the push. The audit pattern: read each doc, grep the codebase + query live D1 / CF API for each factual claim, list drift, surgical patch (don't rewrite).
+
+7. **Skill + memory consolidation.** Lessons from the round (the cherry-pick clobber pattern, the worktree collision, the cache-rate slip from prompt iteration, the FY remount bug) get codified into existing skill files or memory entries. Bias against new skill files (R176 anti-bloat lesson) — fold into existing skills as new sections, only spin a new skill when the trigger-domain is distinct enough that mixing would confuse skill-routing.
+
+8. **PR hygiene.** All open PRs from the round get closed (merged into main or closed with "superseded by main fast-forward" comment). One PR open at a time, ideally — long-lived parallel PRs accumulate cherry-pick conflicts.
+
+The cleanup is `gitops.md` (the playbook) plus this skill (the why). When a future agent wakes into "we just shipped, now what," this section answers that. The cleanup round isn't optional polish — it's how the next round starts with a clean baseline instead of inheriting two days of partial drift.
 
 ## When in doubt
 
