@@ -248,16 +248,16 @@ This is the production recipe. The rationale on each is in `context/architecture
 | **Resend** | Magic-link email (M2.5; deprecated when Clerk lands) → repurposed for transactional | Sender domain `auth.plain-politics.com`, not apex. **Keep `src/lib/resend.ts` even after Clerk** — comment-submission and comment-period-closing notifications will use it. |
 | **Clerk** (next phase) | Identity, social OAuth, MFA, session mgmt, account UI | Override O-6: Praneel's call, "real accounts with associated user data" trajectory needs it. |
 | **Cookie auth `pp_uid`** | Anonymous identity, HttpOnly, SameSite=Lax, 1-year, Secure on HTTPS | Stays after Clerk — anonymous visitors who comment must still work. |
-| **Workers Builds** | Auto-deploy from `main` push, path-filtered triggers | Manual `wrangler deploy` works as fallback. Both `pp-app` and `pp-ingest` are wired. |
+| **Deploys** | Manual `npm run cf:build && wrangler deploy` from clean `main`; pp-ingest via `npm run ingest:deploy` | Workers Builds is NOT git-connected for `pp-app` — R180 proved the prior "auto-deploys on `main` push" assumption was wrong. Push to `main` is just version control; the manager runs the single deploy from a clean checkout after subagents push their feature branches. |
 
 Rejected on this build: GitHub Actions (Workers Builds does it), Anthropic Haiku for summaries (override O-1, swap is one model name change), R2 for static assets (OpenNext binding handles it), Vercel/Netlify hosting.
 
 ## Branching + deploy patterns
 
-- **Branches**: `main` (protected, auto-deploys via Workers Builds), `dev` (integration), feature branches like `overnight/m2-build` (per-effort).
-- **PR flow**: feature → `dev` → `main`. PR #1 was originally aimed at `main`, Praneel asked to retarget to `dev` (`gh pr edit`). Land the next agent on `dev`.
+- **Branches**: `main` (canonical, manager deploys from it), `dev` (kept in sync with `main` as a mirror), feature branches like `phase/r180-a-kv-fix` (per-task; deleted after merge). Stable state = two remote branches only, both at the same commit.
+- **PR flow**: subagents push feature branches → manager cherry-picks all into one combined branch → manager fast-forwards `main` + pushes → manager syncs `dev` to match.
 - **Commits**: small chunks, append-only `context/architecture/run-log.md` heartbeat in parallel. Co-author line: `Co-Authored-By: Claude Opus 4.7 (1M context) <noreply@anthropic.com>`. He'll tell you `"kk commit + push"` when he wants the work captured.
-- **Deploys**: Workers Builds on push to `main`. Build cmd `npm install && npm run cf:build`, deploy cmd `npx wrangler deploy`. Path-gated: `pp-ingest` only rebuilds on `workers/ingest/**`, `wrangler.ingest.jsonc`, `package*.json` touches. Both triggers reuse the same `repo_connection_uuid` and `build_token_uuid` (in `handoff-2026-05-12.md`).
+- **Deploys**: manual. From clean `main`: `npm run cf:build && CLOUDFLARE_API_TOKEN="cfk_..." wrangler deploy`. pp-ingest: `npm run ingest:deploy` (uses `wrangler.ingest.jsonc`). Never deploy from a subagent — the manager runs the single deploy after all feature branches are integrated.
 
 ## Taste posture
 
@@ -316,6 +316,10 @@ He repeats the cost discipline across messages: subagents are free under Max, xA
 ### How to prompt a subagent for him
 
 State the **outcome**, not the steps. From `CLAUDE.md`: "make the tasteful choice and flag it" — same applies to subagents. Bad: "run `wrangler d1 execute`, then check the result, then…" Good: "make D1.regulations show 250+ rows with summary_status='ok'; return the row counts."
+
+### The three-phase pattern for big rounds
+
+For multi-track work (R125-R134 + R180 archetype) use a three-phase parallel pattern. **Phase 1 — parallel read-only investigation.** 2-3 subagents, no worktrees needed, each scoping one slice. Outputs are tight ≤300-word reports with exact file paths, line numbers, and diff sketches — not narrative. Manager keeps context lean (don't shadow the investigation). **Phase 2 — manager synthesizes + locks decisions.** Read the Phase 1 reports, pick the right root fixes, plan migrations + sequencing. **Phase 3 — parallel worktree-isolated execution.** 3-4 subagents in worktrees, each owning one slice end-to-end: edit + commit + push to feature branch. No merges, no deploys from subagents. **Then manager integrates.** Cherry-pick all branches into one combined branch, run migrations on remote D1, deploy from `main`, verify live via curl + Chrome MCP. Phase 2 is the bottleneck — keep Phase 1 reports tight or it stalls.
 
 ### Parallel subagent isolation (worktrees per write-mode agent)
 
@@ -393,7 +397,7 @@ Two buckets that transfer. The second is easy to lose — it's the part of how h
 - AI Gateway in front of every model call (URL, not binding). Visible `degraded: true` UI banners instead of silent fallback.
 - 1000-subrequest-per-Worker-invocation cap is real — batch D1 reads + writes (`db.batch(...)`), pre-fetch in chunks of 100.
 - Resend for transactional email (with the `auth.<apex>` sender-subdomain pattern). Clerk for identity (once next-agent does the pivot).
-- Wrangler + Workers Builds: connect both Workers to GitHub on `main`, path-filtered triggers so docs-only commits don't redeploy the cron worker.
+- Manual `wrangler deploy` from clean `main` after merging feature branches. (Workers Builds CI is not git-connected for pp-app — R180 verified the "auto-deploy on main push" assumption was wrong.)
 
 ### Process + taste patterns (how he works + what good looks like — transfer to any project he's on)
 
@@ -415,6 +419,10 @@ Two buckets that transfer. The second is easy to lose — it's the part of how h
 Use it two ways:
 - **Pre-ship UX check (before saying done).** For any user-facing change: identify which personas the change touches, mentally re-run those steps, ask "does this preserve every observable? does it break or introduce edge cases (sign-in/out cycles, state transitions, weird tapping)?" If the change is real behavior (not pure refactor), drive the affected personas through Chrome MCP before merging. Each persona has explicit pass criteria; agents verify yes/no instead of vibing.
 - **Post-deploy obs check (after every deploy).** Wait 5 min for organic traffic, pull pp-app + pp-ingest logs via CF API, check error rate vs <1% baseline (R161), check `foryou.match` path distribution (llm-success vs db-fallback), check AI Gateway cache rate trend, look for spikes correlated to the deploy. If anything spikes → rollback via `wrangler versions deploy <prev-id>@100`.
+
+**The runs themselves have to be real.** Drive actual UI clicks (welcome modal Continue, FY chip selections, reg card opens, comment portal flows), real signed-in or anon sessions, real browser state across navigations. `curl /api/foryou?session_id=test` is *contract testing* (Layer 1 of the 3-layer verify), not user emulation — a subagent that probes the API and reports the flow as "working" has tested nothing the user actually does, and tends to surface false bugs from inconsistent contract assumptions.
+
+**Default suspicion on persona-audit reports.** When a subagent reports a "bug," tempmail-account / fresh-session / no-persistent-state / misclick-on-overlapping-element / contextual-derivation-didn't-fire-under-test-profile noise dominates. R178A surfaced 10 HIGH items; after Praneel cross-checked against lived experience, 4 were real (URL-encoded state, server-side gates, taxonomy mismatch, missing UI handler), 5 were subagent noise, 1 was intentional retirement. Re-verify each "bug" against a real signed-in session OR a concrete code path / DB row before queuing the fix.
 
 When a "never seen" UI bug surfaces despite code that "looks correct," combine UX flows with the 3-layer verification (§Verifying live-site bugs) — pick the persona that should hit the broken path, run it via Chrome MCP, capture the actual DOM. R141 / R142 / R147 read the FY ribbon code repeatedly and said "looks correct." R157v2 ran the FY persona via Chrome MCP and found the real bugs (remount wiping state, deployed bundle missing R142's chip-size bump).
 
