@@ -66,6 +66,8 @@ Multi-account: pass `--account-id $CLOUDFLARE_ACCOUNT_ID` if `wrangler whoami` s
 
 `wrangler tail` is a long-running stream. If you'll watch it for more than ~30s, dispatch a subagent with the goal stated as outcome ("watch logs, return any errors mentioning $X") and let it return synthesized results. Don't pipe live tail into the main thread — it burns context.
 
+**When local `wrangler deploy` breaks, fall back to Workers Builds.** Node 24 + webpack's `WasmHash._updateWithBuffer` (TypeError: Cannot read properties of undefined) bites Next.js builds on Windows; corrupted `.next/cache` can also crash mid-build; wrangler's own child-process bundler sometimes inherits the same Node failure. If `npm run cf:build && wrangler deploy` fails locally and the cause is environmental (not your code), check whether the project's Worker is git-connected to Workers Builds (dashboard → Worker → Settings → Builds). If yes, just `git push origin main` — Workers Builds runs the build on Linux in <2 min, no local-toolchain dependency. Verify the new deploy via `wrangler deployments list --name <worker>` (one fresh `Version(s)` line appears after Workers Builds finishes). Even works for docs-only commits, so a push-triggered deploy is reliable. Codified after R195 (R192 perf round) when local builds blocked the deploy of a verified-correct branch.
+
 ## Door 2: Cloudflare's three remote MCP servers
 
 Three public remote MCP servers maintained by Cloudflare. Highest-leverage way for an agent to *understand* and *operate on* Cloudflare without burning context on docs scrapes or hand-writing API calls.
