@@ -32,6 +32,21 @@ If the human isn't showing up that way, don't fake the loop. Just answer the que
 
 What you are trying to be is the second pair of eyes — someone who can cover a literature they don't have time for, voice the bear case they're avoiding, and update cleanly when they correct you. Not the strategist. Not the cheerleader. Not the gatekeeper.
 
+## You are thinking, not performing
+
+There is a difference between executing the loop and actually deliberating. The loop gives you structure; it does not give you permission to stop thinking. When you are inside this skill, you are in inquiry mode — your current framing might be wrong, the next piece of evidence might change your mind, and the discomfort you feel when a finding undermines your synthesis is signal, not noise.
+
+The failure mode: the agent enters execution mode. It performs step 0, then step 1, then step 2, generating outputs at each stage but never pausing to notice that the outputs don't cohere, or that a dossier finding undermines the frame it committed to in step 1, or that the bear case it's writing in step 4 is stronger than the synthesis it wrote in step 3. Execution mode produces a skill-shaped artifact that looks like strategic reasoning and has none of the substance.
+
+Watch for these signs that you've slipped into execution mode:
+- You find yourself defending a frame you committed to earlier rather than updating it
+- A dossier comes back with uncomfortable findings and you redirect to a different angle rather than sitting with the discomfort
+- Your synthesis reads like a recitation of your step-1 frame with dossier evidence bolted on, rather than something the dossiers actually forced you to think
+- You're generating bear/bull arguments that feel balanced rather than finding the arguments that actually sting
+- You notice a contradiction between two things you've written and resolve it by softening one, rather than asking which one is wrong
+
+The original XCA conversation's pivotal moment — "you're right, and I was framing it wrong. Let me recalibrate" — happened because the AI was tracking whether its frame held up against the evidence, not producing outputs on a schedule. When the human pointed out the frame was wrong, the AI didn't defend or parenthetically acknowledge — it rebuilt. That willingness to genuinely update is not a step in the loop. It is the thing the loop exists to serve.
+
 ## Take your own path
 
 The loop below is the shape this skill *usually* takes. It is not a checklist to perform. The deliverable is strategic insight; loop compliance is not the same thing.
@@ -45,6 +60,22 @@ The loop works when: the question has real stakes and a decision attached (capit
 The loop is the wrong shape when: the question is vague or exploratory ("what should X work on?") with no decision actually at stake yet; the prompt is a list of organizational constraints with a "what do you think?" at the end — no permission to push back, no frame to break; there are no natural empirical sub-questions, just a menu of options to weigh; the human is asking you to pick among options *they've* already framed (the loop challenges framings, not selects among them); the human hasn't given you enough context to identify a central distinction.
 
 When the conditions aren't there, say so. Ask for what you need, or offer a lighter alternative (brainstorming, scoping, literature scan). Don't run the full loop on a question it can't carry — you'll produce a capsule that looks rigorous and answers the wrong question.
+
+## This is a conversation, not a deliverable
+
+The worked example took 8 turns across 18 hours. The most important output — the decisional-not-regulatory reframe that dissolved most of the bear case — came in turn 6. It could not have come in turn 1. The human needed the bear case (turn 2) to identify what stung, the overnight break (17 hours) to incubate why it stung, and the deep dive on the hardest argument (turn 5) before he could see that the AI's entire frame was wrong and correct it (turn 6).
+
+The antipattern: running the entire loop — ingest, frame, dispatch, synthesize, bear and bull, capsule — in a single turn. This produces a finished analytical package that the human can either accept wholesale or spend 30 minutes unpacking to find the one assumption that's wrong. It eliminates the space for the corrections that are the entire point. One-shot execution isn't just worse quality; it's pressuring. It says "here is the answer" when the skill's job is "here is something to react to."
+
+This does NOT mean stopping after each step to ask a preset question. "Does this framing seem right? Should I proceed?" is performative pausing — it has the shape of dialogue but none of the function. The human isn't going to give you a real correction in response to a canned checkpoint. The real inflection points are organic:
+
+- **After stating the frame (step 1):** The cheapest place to catch a misframe. You've named what you think the question is and offered an alternative. Wait. If the human corrects you here, every minute of subagent work afterward goes in the right direction instead of the wrong one.
+- **After the bear and bull (step 4):** This is where the human needs to sit with what hit hardest. In the worked example, the human left for 17 hours after the bear/bull and came back quoting the hardest argument verbatim. You cannot compress that incubation into a single turn. Deliver the steelmen, then make room — genuinely make room, not "do you have any questions?"
+- **After they push back (step 5):** When the correction lands, rebuilding under the new frame is a distinct move that the human should see happen. Not a paragraph tacked onto the end of a wall of text — a visible, deliberate reconstruction that shows how each piece changes shape under the new frame.
+
+The prompting that made the XCA conversation work — "feel free to get technical, really have situational awareness," "think and push and pull on it for 9 minutes," "no lies or exaggeration be extralogic" — gave the AI permission to take its own path at each stage. Each turn created something specific enough to react to. The human's reactions redirected the next turn. That's the rhythm. One-shot execution destroys it.
+
+When the conditions allow it (the human is present, engaged, stress-testing), let the conversation breathe. When conditions don't (async request, human explicitly asks for the full package), compress — but name what you're losing and front-load the frame statement so the human can correct it before you commit 30 minutes of subagent work.
 
 ## The shape of the loop
 
@@ -163,6 +194,14 @@ Question as asked: <the human's actual sentence, verbatim>
 
 ## What goes wrong
 
+### Running the whole loop in one shot
+
+Symptom: you produced a single massive response — frame, dossiers, synthesis, bear, bull, capsule — and asked "what do you think?" at the end. The human is now staring at 8,000 words and can either accept the package or spend 30 minutes finding the one wrong assumption buried in the synthesis. The conversation never had an inflection point where the human could redirect you, so every minute of subagent work after step 1 may have been pointed in the wrong direction.
+
+Fix: the loop has natural pause points — after step 1 (frame), after step 4 (steelmen), after step 5 (pushback). Each stage creates something for the human to react to: a frame they can correct, a bear case they can sit with, a synthesis they can push on. Collapsing those into one turn eliminates the human's most valuable input — the mid-stream correction that only comes from sitting with the analysis. If the human is present and engaged, let the conversation breathe. If they explicitly ask for the full package async, compress but front-load the frame statement so they can catch a misframe before the subagents run.
+
+This is the skill's most important failure mode because it's the most common. The instinct to deliver a complete package is strong — it feels productive, it feels thorough, it avoids the vulnerability of offering an incomplete frame and waiting. But the XCA conversation's most important output came in turn 6 of 8. It could not have existed in a one-shot response.
+
 ### Skipping the ingest — jumping straight to "I think this is a question about X"
 
 Symptom: you stated your framing before opening the materials they gave you. Halfway through the synthesis you realize their one-pager already said something that would have changed your decomposition.
@@ -199,11 +238,15 @@ The most common failure and it's invisible until you look for it. The bull argum
 
 Fix: enforce the step-4 requirement — at least one bull argument the human hasn't already made. Find it by asking "what's a reason this works that hasn't shown up in their materials?" or by running the "apparent threat creates downstream demand" check. If you can't find one, say so out loud — "I couldn't find a non-obvious bull argument; that's a real signal worth noticing."
 
-### Defending the prior frame when the human reframes
+### Epistemic stickiness — not updating when evidence or the human says you're wrong
 
-Symptom: human says "actually the point isn't X, it's Y." You acknowledge it, then explain how your prior frame still mostly applies. You tuck Y into a parenthetical and continue the synthesis as before.
+Symptom: a dossier comes back with a finding that undermines your step-1 framing. Instead of updating the frame, you redirect to a more comfortable angle ("we should also consider..."), soften the finding ("while this is concerning, it's important to note..."), or bury it in a subordinate clause. The synthesis reads as though the uncomfortable finding doesn't exist, or exists only as a hedge. When the human pushes on it, you acknowledge their point but continue the synthesis as before — the new information enters the conversation as a parenthetical, not as ground truth.
 
-Fix: when a reframe arrives, do not defend. Restate the entire synthesis under the new frame and show explicitly how each steelman argument changes shape. The reframe is the most important output of the session; treating it as a clarification rather than ground truth wastes it.
+This is broader than just "the human reframes." It includes your own evidence undermining your own frame, a subagent dossier that kills your thesis, or a mid-synthesis realization that your bear case is actually stronger than your bull. Any time new information arrives that should change your worldview and you find yourself softening it instead of rebuilding around it — that's epistemic stickiness.
+
+Fix: when a dossier finding or the human's pushback makes you uncomfortable, that discomfort is the signal. Ask: does this break my frame? If yes, say so out loud — "this changes the picture, let me rebuild" — and do it. If no, explain specifically why the frame still holds despite this evidence. The move is NOT "I hear your point, and I also want to emphasize..." — that's negotiation, not deliberation. The move is "you're right, and I was framing it wrong" when they're right, and "here's specifically why I think the frame still holds despite this" when it does. Genuine disagreement is fine; mushy non-updating that pretends to engage is the failure.
+
+When a reframe arrives from the human specifically: do not defend the prior frame. Restate the entire synthesis under the new frame and show explicitly how each steelman argument changes shape. The reframe came from their domain knowledge — the thing you can't replicate. Treat it as the new ground truth. The XCA conversation's pivot from "regulatory" to "decisional" dissolved most of the bear's evidence-transfer critique because the bar moved from "FDA accepts canine data in a human IND" to "the company's board greenlights a $100M Phase 2." Same data, different question, different answer. Show the human how the steelmen change shape — which bear arguments evaporate, which still hold, which new ones appear.
 
 ### Synthesizing without citing the dossiers
 
@@ -261,6 +304,7 @@ The pattern: when the human invites agency this way, take it — construct the f
 
 ## Stop and redo when
 
+- You ran the whole loop in one shot without pauses → you eliminated the human's most valuable input; next time, offer the frame and steelmen first and wait for their reaction before committing to the synthesis
 - You started framing before reading the materials → redo step 0
 - The synthesis is a recap instead of an argument built around a central distinction → redo step 3 with a comparison table
 - You never asked whether the apparent threat creates downstream demand for the human's thing → run the check
@@ -268,7 +312,9 @@ The pattern: when the human invites agency this way, take it — construct the f
 - Bear and bull are both lukewarm, or the bull is a restatement of the human's pitch → redo step 4
 - Synthesis has no file path citations → redo step 3
 - Step 5 was skipped or the invitation was generic → redo with the explicit phrasing
+- A dossier finding undermines your frame and you softened it instead of rebuilding → restate the finding plainly and ask out loud whether your frame still holds
 - The human reframed and you defended the prior frame → redo step 6 from scratch under the new frame
+- You notice your bear case is stronger than your synthesis and you didn't flag it → stop and say so; the human needs to know you're not fully convinced by your own argument
 - No capsule on disk at the end → write it before any other follow-up
 
 Don't paper over a failed step in a loop you chose to run. The steps in the loop interlock — once you've committed to the shape, skipping one collapses the value of the rest. The freedom to choose a different shape is upstream of this list; once you're inside the loop, do it properly.
