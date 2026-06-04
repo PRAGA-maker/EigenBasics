@@ -1,4 +1,9 @@
-# Outreach Quality Check — Runnable Checklist
+---
+name: outreach-quality-check
+description: Use as the gate before declaring any outreach line, batch, folder, or iteration "done." A runnable per-line / per-batch / per-folder / per-iteration / deliverable / exemplar checklist that codifies the bars from taste.md and the outreach skill, with hard-stop conditions that halt the pass and surface to the human.
+---
+
+# Outreach quality check: runnable checklist
 
 This skill is the gate. Before declaring any line, batch, folder, or iteration
 "done," run every applicable item below. Return PASS / FAIL / UNSURE per item
@@ -26,6 +31,7 @@ follow each item; if an item feels unclear, read the cited section in full.
 - [ ] No role-framing: "Your directorship of X", "Your role as Y." The "of" after a possessive is almost always wrong. (→ taste.md "Role-framing")
 - [ ] No credential-framing: "Your 30+ years", "Your 625+ publications", "Your DACVP boards." (→ taste.md "Credential-framing")
 - [ ] No double emphasis: "first real", "one of the very few", "most important." (→ taste.md "Double emphasis")
+- [ ] No antithesis / negation-correction — the loudest single AI shape: "we're not X, we're Y", "not just X", "X, not Y", "more than a [paper/dataset]", "bigger than a single Z." Any sentence shaped *deny the small thing, assert the big thing*. Just assert the big thing. (State the positive directly.)
 - [ ] No sycophancy rhymes: "rare combination", "unique seat", "uniquely positioned", "one of the few", "puts you closer than almost anyone", "exactly what we need", "nobody has more experience." (→ taste.md "Sycophancy patterns")
 - [ ] No institution names — except the person's own company (e.g., "Loyal" for Halioua is fine; "at ELIQUENT" for an employee is not). (→ taste.md V4 bans)
 - [ ] No consultant verbs as load-bearing: "formalize", "accelerate", "leverage", "structure", "align", "convert their thesis." (→ taste.md "Consultant verbs")

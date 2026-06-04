@@ -1,9 +1,14 @@
-# Cold Outreach Pipeline — From Contact List to Sent Emails
+---
+name: outreach
+description: Use when the human asks to find contacts, write cold emails, run a personalization pass, or ship a mass-personalized outreach campaign. The full pipeline: find people, write per-contact emails in their actual voice, QA against convergence and AI tells, fix surgically, and prepare for send.
+---
+
+# Cold outreach pipeline: from contact list to sent emails
 
 This skill runs the full cycle: find people, write personalized emails, QA them,
-and prepare for send. It was battle-tested across 419 contacts in the XCA Analysis
-project and went through 5 iteration rounds before shipping. Everything below is
-hard-won.
+and prepare for send. It was hardened across 419 contacts in the XCA Analysis
+project over 5 iteration rounds before shipping. Everything below is a scar from
+that run, not a guess.
 
 ## Quality enforcement
 
@@ -67,9 +72,16 @@ When the human says: "find contacts", "write outreach", "cold email campaign",
 
 ### Convergence is the #1 failure mode.
 
-Every batch rewrite converges. It's not a bug — it's how language models work.
-You write 50 lines, and by line 30 they all sound the same. The opener drifts to
-one pattern. The ask-verb drifts to one phrase. Word counts cluster.
+Every batch rewrite converges. That's just how language models work: you write 50
+lines, and by line 30 they all sound the same. The opener drifts to one pattern.
+The ask-verb drifts to one phrase. Word counts cluster.
+
+**The convergence that kills replies is structural, not lexical.** A reader spots
+a template by its SHAPE long before they notice a repeated word. Four balanced
+clauses, every line ending on the same tidy button, the same "Your X would help us
+understand Y" skeleton with the nouns swapped. You can ban every flagged word and
+still ship 50 lines that are obviously one mail-merge, because the shape never
+moved. Fix the shape first; the words are the easy part.
 
 **How to fight it:**
 - Isolated context per contact. Each rewrite sees ONLY: taste.md + exemplars +
@@ -247,7 +259,7 @@ cut it. If the question collapses, the name belongs.
 
 ## Communication hierarchy
 
-Every line should land in one of two tiers:
+Every line should land in one of the top two tiers. The third is the failure mode:
 
 - **AMAZING** (~30%) — creative, specific, makes a smart reader stop and think.
   The kind of phrasing that makes someone want to reply.
