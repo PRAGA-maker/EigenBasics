@@ -12,6 +12,9 @@ Fork & enjoy a forever-running autoresearch powered by Claude!
 
 A bedrock template for spinning up always-on research agents. Each fork becomes a focused investigation into a specific research direction.
 
+## Dev: Todo
+Evaluate and add: https://docs.flywheel.paradigma.inc/tutorial#what-to-do-with-flywheel
+
 ## The Suspicion
 
 <!-- Replace with your research question / hypothesis -->
