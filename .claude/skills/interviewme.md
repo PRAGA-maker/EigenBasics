@@ -1,4 +1,5 @@
 ---
+name: interviewme
 description: Interview me with AskUserQuestion to fully understand my intent, then derive todos
 ---
 
