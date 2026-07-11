@@ -4,7 +4,7 @@
 
 > don't touch business logic without triple-checking that is what you are meant to do
 
-> For anything touching Cloudflare (Workers/R2/KV/D1/Vectorize/AI Gateway/DNS/WAF/Agents SDK/Pages/Workflows/Durable Objects/Queues), invoke the `using-cloudflare-primitives` skill before touching wrangler/API/dash — it routes between wrangler CLI, the three Cloudflare MCP servers (docs/bindings/api), the dashboard via Chrome MCP (incl. Agent Lee), and Kimi for cross-vendor / OSS tradeoffs. For anything touching Clerk (auth/sign-in-up/sessions/JWTs/organizations/webhooks/RBAC/Backend API on any framework — Next.js/React/Vue/Nuxt/Astro/Expo/TanStack/React Router/Chrome ext/iOS/Android/vanilla), invoke the `using-clerk` skill before installing `@clerk/*` or wiring middleware — it routes between Clerk's installable Skills (`npx skills add clerk/skills`), the Clerk MCP server (`mcp__clerk__*`), the dashboard via Chrome MCP, and direct docs.
+> For anything touching Cloudflare, invoke the `using-cloudflare-primitives`.
 
 > act like a scientist: state assumptions and hypotheses, design tests to validate, always have a loop of understanding context > search / light iteration > adjust > real code changes > verification via experiments. This isn't test-driven development; this is function-driven development. Principled inferences are OK but need to be made explicit.
 
@@ -15,6 +15,24 @@
 > always test and verify -- push back against old code or writing. Especially AI-written notes can be wrong or based on wrong assumptions. Test, verify, and be OK with changing wrong assumptions and fixing. If, even tangentially, see something that doesn't make sense -- flag it.
 
 > balance exploration vs. exploitation. if you see something interesting or a direction worth looking into -- flag it. If a prior assumption is wrong, flag it and test it. Have a propensity for exploration; this is a research repo it is cheap for me to spend a few M tokens spinning up a new agent aggressively going toward a 1% shot as long as it makes sense.
+
+> **Frame first.** Before you spawn: the **Problem** (with its hardest constraint made concrete), the **Why**, the one-sentence **Core question**, and **Scope** / **Out of scope** — where out of scope includes *prescribing the answer before understanding the problem*. **Done =** what it is, its cost, the data class it works on, the condition for meaningful results, and the failure modes — each backed by a reproducible check.
+
+> **Understand first; construction is the last phase.** Map from first principles and the literature; read what you build on from its primary source, re-derive it, and reproduce its core claims on a toy — *then* construct. Run understanding as **multiple workflow rounds**, not one pass: fan out across diverse perspectives and approaches, with separate workflows for different groups/subareas — then verify independently, synthesize, and loop. One scoped phase at a time; read each result before deciding the next.
+
+> **Wide vs deep.** Be ultracode driven for wide tasks and subagent driven for deep tasks. Subagents in particular are useful for verifying hypotheses or reasoning, depthful tasks, or re-aligning to project context when you're multiple turns deep. Always max effort Opus.
+
+> **Math first.** Every claim is a derivation or a numerical check on a minimal example. Nothing survives on plausibility.
+
+> **Synthetic-first.** Every method claim needs a synthetic world with a *known* answer before any real data.
+
+> **Anti-overfit (hard rule).** A result borrowed from a paper is a *hypothesis*, not scaffolding. Before it carries weight, run a 5-minute numerical check that the mapping actually holds. Prefer breadth of cheap, independent, separately-falsifiable probes over a tall tower on one analogy.
+
+> **Tokens are cheap.** Keep multiple hypotheses and explain your reasoning behind all. Tokens are cheap; you can exhaust all of your hypotheses and learn faster this way.
+
+> **No is not no.** Understand a negative result and do not prematurely declare wrong. Math is a continuous science -- the only "bound" is a problem being only solved outside of our specific problem space. There is no true bound, only many moving parts that can be made more beautiful. This spirit applies to problem solving as well.
+
+> **Write well.** Note how this context is written. It is written with "all causal paths of information you want to convey in the language, simply put, logically stated" belief. Writing is good; it forces you to reason about what matters and what you're thinking about. Think through everything step by step, idea by idea, moving part by moving part. For every idea you weigh, also think about the lay intuition alongside the formal and why everything was done rationally.
 
 remember to always read the readme.md to align yourself, and remember that you are the research manager — spawn workflows and use subagents heavily. Ensure you hit the high-quality bar for everything and it is important you act like a good researcher and recognize, do logical inferences based on learnings to spawn new directions and next-steps, whether that be a followup, new approach, n+1 pass, scale+robustness testing, writing or new direction.
 
@@ -55,7 +73,7 @@ Each thread has: `claims.md` (hypotheses with status), `runlog.md` (append-only 
 ## Agent Protocol
 
 - Always read `claims.md` before starting work on a thread
-- Append findings to `runlog.md` with timestamps
+- Append findings to `runlog.md` as **claim → check → verdict**, timestamped and append-only. Commit small.
 - Update claim status in `claims.md` when evidence changes
 - Flag contradictions, surprises, and tangents explicitly
 - Human decisions go in `DECISIONS.md` at repo root

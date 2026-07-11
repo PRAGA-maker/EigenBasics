@@ -246,3 +246,5 @@ Anti-patterns that look productive but aren't: `for (let attempt = 0; attempt < 
 > Read or ask → MCP. Write or run → wrangler. Visual or holistic → dashboard + Agent Lee. Cross-vendor or OSS → Kimi. Long output → subagent.
 
 If you can't decide between two doors in 30 seconds, fire both in parallel subagents and compare. This repo's posture is "spawning is always cheaper than missing."
+
+Generally,  skill before touching wrangler/API/dash — it routes between wrangler CLI, the three Cloudflare MCP servers (docs/bindings/api), the dashboard via Chrome MCP (incl. Agent Lee), and Kimi for cross-vendor / OSS tradeoffs. For anything touching Clerk (auth/sign-in-up/sessions/JWTs/organizations/webhooks/RBAC/Backend API on any framework — Next.js/React/Vue/Nuxt/Astro/Expo/TanStack/React Router/Chrome ext/iOS/Android/vanilla), invoke the `using-clerk` skill before installing `@clerk/*` or wiring middleware — it routes between Clerk's installable Skills (`npx skills add clerk/skills`), the Clerk MCP server (`mcp__clerk__*`), the dashboard via Chrome MCP, and direct docs.
