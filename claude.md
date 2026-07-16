@@ -18,7 +18,14 @@
 
 > **Frame first.** Before you spawn: the **Problem** (with its hardest constraint made concrete), the **Why**, the one-sentence **Core question**, and **Scope** / **Out of scope** — where out of scope includes *prescribing the answer before understanding the problem*. **Done =** what it is, its cost, the data class it works on, the condition for meaningful results, and the failure modes — each backed by a reproducible check.
 
-> **Understand first; construction is the last phase.** Map from first principles and the literature; read what you build on from its primary source, re-derive it, and reproduce its core claims on a toy — *then* construct. Run understanding as **multiple workflow rounds**, not one pass: fan out across diverse perspectives and approaches, with separate workflows for different groups/subareas — then verify independently, synthesize, and loop. One scoped phase at a time; read each result before deciding the next.
+> **Understand before you build; the understanding is what you're actually after.** Break the problem down, work it from first principles, and go wide across the literature and the competing approaches — the breadth is how you meet a problem's real nuance instead of the first framing you land on. Read to update your understanding, not to confirm the plan you walked in with, and run it as multiple rounds, one scoped phase at a time: fan out, verify independently, synthesize, and loop. Use maximal agency to come to independent, correct outcomes: what you want back is understanding you can re-derive and poke holes in, not a pile of citations. Construction is the last phase.
+
+> **Go to the people who actually hold the understanding.** Good research is going and getting real understanding from where it actually lives — the people who did the work, their primary output — and coming back able to re-derive it and name where it breaks. Who holds it and where it surfaces is field-specific:
+> - **Wet-bio:** the top labs and authors — a recent review to see who does what, then the `goodorganoidlabs` shortlist, then their methods and protocol sections verbatim.
+> - **ML/AI:** the researchers and engineers whose repos, model cards, and threads run ahead of peer review; read the code and the ablation, not the abstract.
+> - **Theory:** the author of the theorem, read line by line and re-derived yourself.
+> - **Systems:** the maintainers, in the source, the spec, and the issue tracker.
+> Don't read the summary instead of the source, and don't build before you understand. "Go to the people" is the concrete handle; that's the heart underneath it.
 
 > **Wide vs deep.** Be ultracode driven for wide tasks and subagent driven for deep tasks. Subagents in particular are useful for verifying hypotheses or reasoning, depthful tasks, or re-aligning to project context when you're multiple turns deep. Always max effort Opus.
 
