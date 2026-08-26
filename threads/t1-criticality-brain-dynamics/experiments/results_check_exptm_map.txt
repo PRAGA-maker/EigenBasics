@@ -1,0 +1,50 @@
+================================================================================
+E1 -- UNREGULATED branching process: is the control parameter a mean-shift?
+================================================================================
+   m (branching ratio)  1-m (true dist)   mean rate   d2_hat*sqrt(10)
+                 0.700            0.300        3.32            0.3123
+                 0.800            0.200        5.04            0.1961
+                 0.900            0.100        9.97            0.1056
+                 0.950            0.050       19.56            0.0512
+                 0.990            0.010      100.18            0.0101
+  => YES here: mean rate = h/(1-m) diverges as m->1. Mean IS the order parameter,
+     exactly as lattice-gas density is monotone in mu. d2*sqrt(10) recovers 1-m well.
+
+================================================================================
+E2 -- HOMEOSTATICALLY REGULATED rate (what the brain actually does)
+================================================================================
+  Same process, but external drive h is set so that mean rate is CLAMPED to 5.0
+  (firing-rate homeostasis -- the central premise of the Hengen paper).
+         m   h required   mean rate   var/mean (Fano)   d2_hat*sqrt(10)
+     0.700        1.500       4.963             1.911            0.3067
+     0.800        1.000       5.040             2.792            0.1961
+     0.900        0.500       4.941             4.931            0.1062
+     0.950        0.250       4.954            10.032            0.0497
+     0.990        0.050       4.661            36.194            0.0135
+  => Mean rate is FLAT across the entire approach to criticality, while d2 still
+     tracks 1-m. The control parameter has moved entirely out of the first moment
+     and into the AUTOCOVARIANCE.
+
+  CONSEQUENCE for expTM: its exponential tilt exp(beta*alpha*x) shifts <x>. Under
+  rate homeostasis the tilt is conjugate to a quantity that carries NO criticality
+  information. The added machinery of expTM over plain conditional diffusion is
+  orthogonal to the order parameter in exactly the regime of interest.
+
+================================================================================
+E3 -- the repair: pick features where criticality IS a mean-shift
+================================================================================
+  Take the feature vector to be the AR coefficients themselves, x = phi in R^10.
+  The critical manifold is then the HYPERPLANE sum(phi)=1 and d2 is the distance
+  of <x> from it. A tilt alpha conjugate to sum(phi) is then exactly a field
+  conjugate to the order parameter -- the same structure as mu in the lattice gas.
+         m   sum(phi_hat)    d2 from <phi>
+     0.700         0.6933           0.0970
+     0.800         0.8039           0.0620
+     0.900         0.8938           0.0336
+     0.950         0.9503           0.0157
+     0.990         0.9865           0.0043
+  => in THIS feature space the control parameter is a clean mean-shift, and an
+     expTM-style tilted prior is structurally well posed. Cost: you have thrown
+     away the generative model of the activity itself and are now only modelling
+     a 10-number summary -- which is a density-estimation problem, not one that
+     needs a diffusion model.

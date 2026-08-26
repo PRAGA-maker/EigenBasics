@@ -1,0 +1,45 @@
+==============================================================================
+C2 -- noiseless control + SNR scaling of the mouse spike-count estimator
+==============================================================================
+  true latent AR(1) mu=0.9: analytic AR(10)-fit d2 = (1-mu)/sqrt(10) = 0.0316
+  d2 measured on the NOISELESS latent itself      = 0.0312 +/- 0.0008   <-- ground truth
+    N*rate (expected spikes/bin)     d2_hat   inflation over truth
+   N= 15 rate= 5.0 ->    1.12      0.1400                 4.4x
+   N= 25 rate= 5.0 ->    1.88      0.1132                 3.6x
+   N= 34 rate= 5.0 ->    2.55      0.1015                 3.2x
+   N= 50 rate= 5.0 ->    3.75      0.0861                 2.7x
+   N= 71 rate= 5.0 ->    5.33      0.0758                 2.4x
+   N= 34 rate= 1.0 ->    0.51      0.1845                 5.8x
+   N= 34 rate=10.0 ->    5.10      0.0773                 2.4x
+   N= 71 rate=10.0 ->   10.65      0.0606                 1.9x
+   N=200 rate=20.0 ->   60.00      0.0409                 1.3x
+  => d2_hat is monotone in 1/(N*rate): it is dominated by Poisson sampling noise,
+     not by the latent dynamics, over the entire ensemble-size range the paper used.
+
+==============================================================================
+D2 -- human pipeline: does instrumental SNR alone span the reported range?
+==============================================================================
+     instrumental white noise (x signal RMS)           d2
+                                        0.00    4.913e-05
+                                        0.25    5.072e-05
+                                        0.50    5.353e-05
+                                        1.00    6.065e-05
+                                        2.00    8.560e-05
+                                        4.00    1.716e-04
+                                        8.00    2.373e-04
+  paper's reported patient range: 0.6e-4 .. 1.8e-4 ; pure-noise pipeline value ~2.3e-4
+  => the whole patient axis lies inside the band that instrumental SNR alone sweeps.
+
+==============================================================================
+D3 -- how much of the human d2 is the smoothing kernel?
+==============================================================================
+      Gaussian smoothing kernel (ms)     d2 of PURE WHITE NOISE
+                              0.0001                  1.208e-01
+                              5.0000                  2.710e-03
+                             10.0000                  7.594e-04
+                             25.0000                  1.978e-04
+                             50.0000                  1.194e-04
+                            100.0000                  2.287e-04
+                            200.0000                  7.646e-05
+  => d2 falls ~2 orders of magnitude as the kernel widens. AR(10) at 500 Hz reaches
+     20 ms of lag; the 100 ms kernel sets the autocorrelation the model is fitting.

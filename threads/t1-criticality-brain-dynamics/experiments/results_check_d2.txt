@@ -1,0 +1,68 @@
+==============================================================================
+CHECK A -- what d2 actually is
+==============================================================================
+ trial 0: sum(phi)=-19.034472  d2=6.335456  1/(sqrt(p)*DCgain)=+6.335456  1/(sqrt(p)*sqrt(S(0)/sig2))=6.335456
+ trial 1: sum(phi)=+0.171392  d2=0.262029  1/(sqrt(p)*DCgain)=+0.262029  1/(sqrt(p)*sqrt(S(0)/sig2))=0.262029
+ trial 2: sum(phi)=-19.938576  d2=6.621359  1/(sqrt(p)*DCgain)=+6.621359  1/(sqrt(p)*sqrt(S(0)/sig2))=6.621359
+  => d2 == 1/(sqrt(p) * DC gain) == sigma_innov / (sqrt(p) * sqrt(S(0))) exactly.
+  => d2 is a monotone reparametrisation of the ZERO-FREQUENCY susceptibility.
+  => (1 - sum(phi)) is exactly the coefficient tested by an augmented Dickey-Fuller
+     unit-root test:  dy_t = rho*y_{t-1} + sum(gamma_i dy_{t-i}) + e_t, rho = sum(phi)-1.
+
+==============================================================================
+CHECK B -- d2 vs true distance to instability, AR(2) stability triangle
+==============================================================================
+  model                                        d2  spec.radius  1-rho (true dist)
+  white noise            (0.00, 0.00)      0.7071       0.0000             1.0000
+  near zero-freq unit rt (0.90, 0.09)      0.0071       0.9908             0.0092
+  near Nyquist unit root (-0.90,0.09)      1.2799       0.9908             0.0092
+  near Hopf, theta=pi/2  (0.00,-0.99)      1.4071       0.9950             0.0050
+  near Hopf, theta=2pi/3 (-0.99,-0.99)     2.1072       0.9950             0.0050
+  EXACT Hopf, theta=pi/2 (0.00,-1.00)      1.4142       1.0000             0.0000
+  => white noise d2 = 1/sqrt(2) = 0.7071 for p=2.
+  => a system EXACTLY on the Hopf edge (marginally stable, diverging susceptibility
+     at f=Nyquist/2) scores d2 = 1.41, i.e. TWICE as 'far from criticality' as white noise.
+  => d2 measures distance to the sum(phi)=1 face ONLY (zero-frequency / 'ferromagnetic'
+     critical manifold). It is NOT distance to the bifurcation set.
+
+==============================================================================
+CHECK C -- does ensemble size fake a d2 difference?
+==============================================================================
+  latent AR(1) mu = 0.9 (identical for every row); only N neurons / rate change
+   N neurons  rate Hz    d2_hat (mean+/-sd over 8 seeds)
+          15      5.0               0.1382 +/- 0.0023
+          25      5.0               0.1130 +/- 0.0030
+          34      5.0               0.1007 +/- 0.0023
+          50      5.0               0.0863 +/- 0.0013
+          71      5.0               0.0752 +/- 0.0021
+          34      1.0               0.1883 +/- 0.0041
+          34      2.5               0.1321 +/- 0.0019
+          34      5.0               0.1007 +/- 0.0023
+          34     10.0               0.0774 +/- 0.0006
+  paper's reported between-animal range: 0.111 - 0.176 (between-animal SD = 0.015)
+  paper's reported per-animal ensemble sizes: 15 - 71 RSUs (mean 34)
+
+==============================================================================
+CHECK D -- the human high-gamma-envelope pipeline
+==============================================================================
+  NOTE: paper resamples to 500 Hz, band-passes 70-250 Hz, Hilbert envelope,
+        smooths with a 100 ms Gaussian, z-scores, then fits AR(10).
+        AR(10) at 500 Hz spans lags of only 20 ms -- far inside the 100 ms kernel.
+  pure white noise         d2 = 2.327e-04 +/- 2.9e-05
+  1/f noise (pink)         d2 = 2.229e-04 +/- 5.5e-05
+  white + 5x amplitude     d2 = 2.327e-04 +/- 2.9e-05
+  paper's reported human d2 range (Fig 4C x-axis): 0.6e-4 to 1.8e-4
+  paper's mouse/ferret d2 range: 0.087 - 0.187  (~1000x larger)
+
+==============================================================================
+CHECK E -- is the specificity claim statistically supported at n=13?
+==============================================================================
+  d2       |rho|=0.860  rho^2=0.74  95% CI on rho^2 = [0.35, 0.92]
+  Fano200  |rho|=0.583  rho^2=0.34  95% CI on rho^2 = [0.00, 0.74]
+  Williams test, H0: rho(d2,learning) == rho(Fano,learning), as a function of
+  how strongly d2 and Fano themselves correlate (r_kh):
+    r(d2,Fano)=0.0  t= 1.67  p=0.125  NOT distinguishable
+    r(d2,Fano)=0.3  t= 1.56  p=0.150  NOT distinguishable
+    r(d2,Fano)=0.5  t= 1.70  p=0.119  NOT distinguishable
+    r(d2,Fano)=0.7  t= 2.17  p=0.055  NOT distinguishable
+    r(d2,Fano)=0.9  t= 7.47  p=0.000  DIFFERENT
