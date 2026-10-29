@@ -100,6 +100,14 @@ Periodically audit attention allocation across threads — runlog recency, new-c
 
 Read `taste.md` before writing anything a human will read. For cold outreach specifically, see `.claude/commands/outreach-pipeline.md`.
 
+## Engineering
+
+For implementation, debugging, refactoring, code review, scripts, notebooks, infrastructure, and system design, use `/tasteful-engineering` and read [.claude/skills/tasteful-engineering/SKILL.md](.claude/skills/tasteful-engineering/SKILL.md).
+
+For tensor operations, GPU kernels, or performance-sensitive ML training/inference, also use `/tensor-kernel-engineering` and read [.claude/skills/tensor-kernel-engineering/SKILL.md](.claude/skills/tensor-kernel-engineering/SKILL.md). Load only task-relevant references. Prefer measured performance and explicit numerical/shape reasoning; use custom kernels when justified by the workload.
+
+Apply these preferences within the requested scope and the repository's instructions. Routine technical work does not require a benchmark campaign, new process documents, or a literature review.
+
 ## Context management
 
 Keep context well-organized as you go — a `/context` folder at the repo root holds reference material; pull load-bearing sources in and keep the working set tight. This is good practice regardless of compaction.
