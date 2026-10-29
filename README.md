@@ -35,6 +35,15 @@ Evaluate and add: https://docs.flywheel.paradigma.inc/tutorial#what-to-do-with-f
 - **Dependency mgmt:** `uv`
 - **Agent protocol:** See `claude.md` for the full research agent operating manual
 
+## Engineering Skills
+
+The engineering-taste skills from Praneel's local Codex harness are available here in [Claude Code's project skill format](https://code.claude.com/docs/en/skills#choose-where-skills-load). `claude.md` applies them to relevant technical work; you can also invoke them directly:
+
+| Skill | Use |
+| --- | --- |
+| [`/tasteful-engineering`](.claude/skills/tasteful-engineering/SKILL.md) | Clear code, repository fit, sound engineering judgment, and verification proportional to the change. |
+| [`/tensor-kernel-engineering`](.claude/skills/tensor-kernel-engineering/SKILL.md) | Tensor shapes and numerical correctness, GPU kernels, and measured ML training/inference performance. |
+
 ## Structure
 
 ```
